@@ -31,7 +31,6 @@ dependencies {
 
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
-    implementation 'mysql:mysql-connector-java:8.0.37' // 실제 사용하려는 버전으로 변경
 
     compileOnly 'org.projectlombok:lombok'
 	annotationProcessor 'org.projectlombok:lombok'
