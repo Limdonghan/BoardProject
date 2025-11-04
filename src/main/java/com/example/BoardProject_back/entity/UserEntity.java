@@ -39,7 +39,7 @@ public class UserEntity {
 
     @Enumerated(EnumType.STRING)
     @Column(name = "is_role", nullable = false)
-    private com.example.BoardProject.entity.UserRole userRole;  // 유저 권한
+    private UserRole userRole;  // 유저 권한
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)

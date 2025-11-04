@@ -1,4 +1,4 @@
-package com.example.BoardProject.entity;
+package com.example.BoardProject_back.entity;
 
 import lombok.AllArgsConstructor;
 import lombok.Getter;
