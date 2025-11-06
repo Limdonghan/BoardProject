@@ -6,19 +6,19 @@ import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.entity.UserRole;
 import com.example.BoardProject_back.repository.GradeRepository;
 import com.example.BoardProject_back.repository.UserRepository;
-import com.example.BoardProject_back.service.accountService;
+import com.example.BoardProject_back.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 
 @Service
 @RequiredArgsConstructor
-public class accountServiceImpl implements accountService {
+public class AccountServiceImpl implements AccountService {
 
     private final UserRepository userRepository;
     private final GradeRepository gradeRepository;
 
 
-    /* 회원가입 로직 */
+    /** 회원가입 로직 */
     @Override
     public void account_creative(CreateDTO createDTO) {
         GradeEntity gradeEntity = gradeRepository.findById(1)
