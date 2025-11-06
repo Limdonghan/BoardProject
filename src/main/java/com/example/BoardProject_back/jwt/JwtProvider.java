@@ -31,7 +31,7 @@ public class JwtProvider {
     public void init(){
         /// 문자열 secretKey를 Key 객체로 변환
         byte[] keyBytes = jwtProperties.getSecretKey().getBytes();
-        this.key=Keys.hmacShaKeyFor(keyBytes);
+        this.key= Keys.hmacShaKeyFor(keyBytes);
     }
 
     public Jws<Claims> getClaims(final String token) {  //jwt 토큰을 구문 분석하고 Claims을 반환, 토큰 유효성 확인
