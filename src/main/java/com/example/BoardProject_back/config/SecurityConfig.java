@@ -27,19 +27,18 @@ public class SecurityConfig {
 
     @Bean
     public SecurityFilterChain securityFilterChain(HttpSecurity http) throws Exception{
-        http.authorizeHttpRequests(authorizeRequest -> authorizeRequest
-                .requestMatchers("/api/user/**").permitAll()
-                .anyRequest().authenticated())  /// 그 외의 요청은 인증된 사용자만 접근
+        http.
+                authorizeHttpRequests(authorizeRequest ->
+                                authorizeRequest
+                                        .requestMatchers("/api/user/**").permitAll()
+                                        .requestMatchers("/api/auth/login").permitAll()
+                                        .anyRequest().authenticated()
+                )  /// 그 외의 요청은 인증된 사용자만 접근
                 .csrf(csrf -> csrf.disable())  /// JWT 사용 시 CSRF 보호 비활성화
                 .formLogin(formLogin -> formLogin.disable())  /// 기본 로그인 폼 비활성화 (JWT 사용)
                 .httpBasic(httpBasic->httpBasic.disable())  /// HTTP Basic 인증 비활성화
 
-                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class)
-
-        ;
-
-
-
+                .addFilterBefore(jwtAuthenticationFilter, UsernamePasswordAuthenticationFilter.class);
 
         return http.build();
     }

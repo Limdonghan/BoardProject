@@ -58,6 +58,7 @@ public class JwtProvider {
     /// accessToken 생성
     public String createAccessToken(final String loginID) {
         String accessToken = Jwts.builder()
+                .claim("loginID", loginID)
                 .setSubject(loginID)
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+ jwtProperties.getExpiration()))
@@ -96,6 +97,8 @@ public class JwtProvider {
     }
 
     public Authentication getAuthentication(final String token) {
+        log.info("----------------getAuthentication------------------------");
+        log.info("getAuthentication : {}",token);
         /// 1. 토큰에서 Claims 추출 및 유효성 검증 (서명, 만료 등)
         final Jws<Claims> claims = getClaims(token); // 이전 질문에서 구현한 메서드 호출
 
@@ -123,18 +126,21 @@ public class JwtProvider {
 
     ///  토큰 타입 검사
     public boolean isWrongType(final Jws<Claims> claims, final String tokenType) {
+        log.info("---------------------isWrongType--------------------------------");
         Object t = claims.getBody().get("token_type");
         boolean type = (t == null) || !t.toString().equalsIgnoreCase(tokenType);
         log.info("토큰타입검사:{}",type);
         return type;
-        // Header를 계속 쓰려면 기존 코드 유지: !claims.getHeader().get(Header.JWT_TYPE).equals(jwtType.toString())
     }
 
+    ///  Http 요청의 authorization를 헤더로 가져와서 헤더에서 extractToken메서드로 리턴
     public String extractTokenFromRequest(HttpServletRequest request) {
+        log.info("----------------------extractTokenFromRequest--------------------------");
 
         /// 1. Authorization 헤더 값 가져오기 (예시: "Bearer eyJhbGciOiJIUzI1Ni...")
+        log.info("HttpHeaders.AUTHORIZATION : {}",HttpHeaders.AUTHORIZATION);
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-
+        log.info("authorizationHeader : {}", authorizationHeader);
         /// 2. 실제 토큰 문자열 추출 (extractToken 메서드 호출)
         String extractToken = extractToken(authorizationHeader);
         log.info("extractToken: {}", extractToken);
@@ -143,6 +149,7 @@ public class JwtProvider {
 
     /// 토큰이 비어있는지 확인 && Bearer로 시작하면 Bearer를 제거 후 리턴
     public String extractToken(final String token) {
+        log.info("--------------------extractToken-------------------------------");
         if(StringUtils.hasText(token)&&  token.startsWith("Bearer ")){
             return token.substring(7);
         }
