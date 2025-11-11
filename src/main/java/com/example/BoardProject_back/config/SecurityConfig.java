@@ -32,6 +32,7 @@ public class SecurityConfig {
                                 authorizeRequest
                                         .requestMatchers("/api/user/find/account").authenticated()
                                         .requestMatchers("/api/user/createAccount").permitAll()
+                                        .requestMatchers("/api/user/refresh").permitAll()
                                         .requestMatchers("/api/auth/login").permitAll()
                                         .anyRequest().authenticated()
                 )  /// 그 외의 요청은 인증된 사용자만 접근

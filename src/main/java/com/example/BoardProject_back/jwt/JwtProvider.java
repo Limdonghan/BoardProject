@@ -3,12 +3,15 @@ package com.example.BoardProject_back.jwt;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.repository.UserRepository;
 import com.example.BoardProject_back.security.CustomUserDetails;
+import com.example.BoardProject_back.service.RedisService;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
 import jakarta.annotation.PostConstruct;
 import jakarta.servlet.http.HttpServletRequest;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.data.redis.core.RedisCallback;
+import org.springframework.data.redis.core.RedisTemplate;
 import org.springframework.http.HttpHeaders;
 import org.springframework.security.core.Authentication;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
@@ -17,6 +20,7 @@ import org.springframework.util.StringUtils;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -27,11 +31,15 @@ public class JwtProvider {
     private final UserRepository userRepository;
     private Key key;
 
+    private final RedisTemplate<String, String> redisTemplate;
+    //private final RedisService redisService;
+
+
     @PostConstruct
-    public void init(){
+    public void init() {
         /// 문자열 secretKey를 Key 객체로 변환
         byte[] keyBytes = jwtProperties.getSecretKey().getBytes();
-        this.key= Keys.hmacShaKeyFor(keyBytes);
+        this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
     public Jws<Claims> getClaims(final String token) {  //jwt 토큰을 구문 분석하고 Claims을 반환, 토큰 유효성 확인
@@ -62,10 +70,10 @@ public class JwtProvider {
                 .setSubject(loginID)
                 .claim("token_type", "Access")  /// claim에 명시적으로 넣어주어야 나중에 token검사때 꺼낼 수 있음
                 .setIssuedAt(new Date(System.currentTimeMillis()))
-                .setExpiration(new Date(System.currentTimeMillis()+ jwtProperties.getExpiration()))
+                .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getExpiration()))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-        log.info("accessToken : {}",accessToken);
+        log.info("accessToken : {}", accessToken);
         return accessToken;
     }
 
@@ -78,15 +86,24 @@ public class JwtProvider {
                 .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshExpiration()))
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
-        log.info("refreshToken : {}",refreshToken);
+        log.info("refreshToken : {}", refreshToken);
+        try{
+            redisTemplate.opsForValue().set(
+                    loginID,
+                    refreshToken,
+                    jwtProperties.getRefreshExpiration(),
+                    TimeUnit.MILLISECONDS
+            );
+        }catch (Exception e){
+            System.out.println(e.getMessage());
+        }
+
         return refreshToken;
     }
 
 
-
-
     /// JWT 토큰의 남은 유효시간을 얻어오는 메서드
-    public Long getExpiration(String token){
+    public Long getExpiration(String token) {
         Date expiration = Jwts.parserBuilder()
                 .setSigningKey(key)
                 .build()
@@ -111,7 +128,7 @@ public class JwtProvider {
         /// 3. 사용자 정보 조회 및 Principal 생성
         final String login = claims.getBody().getSubject(); /// 토큰의 subject (여기서는 loginID) 추출
         final UserEntity userEntity = userRepository.findByEmail(login) /// DB에서 사용자 정보 조회
-                /// 사용자가 없으면 예외 발생
+        /// 사용자가 없으면 예외 발생
                 .orElseThrow(() -> new RuntimeException("잘못된 회원정보!@!@ (사용자가 없음)"));
 
         /// 4. Authentication 객체 생성 및 반환
@@ -143,7 +160,7 @@ public class JwtProvider {
 
     /// 토큰이 비어있는지 확인 && Bearer로 시작하면 Bearer를 제거 후 리턴
     public String extractToken(final String token) {
-        if(StringUtils.hasText(token)&&  token.startsWith("Bearer ")){
+        if (StringUtils.hasText(token) && token.startsWith("Bearer ")) {
             return token.substring(7);
         }
         return token;

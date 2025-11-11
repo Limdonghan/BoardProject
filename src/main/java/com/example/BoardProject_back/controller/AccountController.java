@@ -1,6 +1,8 @@
 package com.example.BoardProject_back.controller;
 
 import com.example.BoardProject_back.dto.CreateDTO;
+import com.example.BoardProject_back.dto.JwtTokenDTO;
+import com.example.BoardProject_back.dto.RefreshTokenDTO;
 import com.example.BoardProject_back.dto.UserInfoDTO;
 import com.example.BoardProject_back.service.AccountService;
 import lombok.RequiredArgsConstructor;
@@ -16,7 +18,7 @@ import org.springframework.web.bind.annotation.*;
 @RequiredArgsConstructor
 @RequestMapping("/api/user")
 public class AccountController {
-    private final AccountService createService;
+    private final AccountService accountService;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -26,13 +28,20 @@ public class AccountController {
     public ResponseEntity signup(@Validated CreateDTO createDTO){
         String encode = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encode);
-        createService.accountCreative(createDTO);
+        accountService.accountCreative(createDTO);
         return ResponseEntity.ok("회원가입성공하냐??!");
     }
 
     /// 유저 정보 검색
     @GetMapping("/find/account")
     public ResponseEntity<UserInfoDTO> getCurrentUserInfo(){
-        return ResponseEntity.ok(createService.getCurrentUserInfo());
+        return ResponseEntity.ok(accountService.getCurrentUserInfo());
     }
+
+    /// AccessToken 재생성
+    @PostMapping("/refresh")
+    public JwtTokenDTO refresh(@Validated @RequestBody RefreshTokenDTO refreshTokenDTO) {
+        return accountService.getRefreshToken(refreshTokenDTO.getRefreshToken());
+    }
+
 }
