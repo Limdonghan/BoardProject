@@ -60,6 +60,7 @@ public class JwtProvider {
         String accessToken = Jwts.builder()
                 .claim("loginID", loginID)
                 .setSubject(loginID)
+                .claim("token_type", "Access")  /// claim에 명시적으로 넣어주어야 나중에 token검사때 꺼낼 수 있음
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis()+ jwtProperties.getExpiration()))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -72,6 +73,7 @@ public class JwtProvider {
     public String createRefreshToken(final String loginID) {
         String refreshToken = Jwts.builder()
                 .setSubject(loginID)
+                .claim("token_type", "Refresh")
                 .setIssuedAt(new Date(System.currentTimeMillis()))
                 .setExpiration(new Date(System.currentTimeMillis() + jwtProperties.getRefreshExpiration()))
                 .signWith(key, SignatureAlgorithm.HS256)
@@ -97,15 +99,13 @@ public class JwtProvider {
     }
 
     public Authentication getAuthentication(final String token) {
-        log.info("----------------getAuthentication------------------------");
-        log.info("getAuthentication : {}",token);
         /// 1. 토큰에서 Claims 추출 및 유효성 검증 (서명, 만료 등)
         final Jws<Claims> claims = getClaims(token); // 이전 질문에서 구현한 메서드 호출
 
         /// 2. 토큰 타입 확인 (Access Token인지 확인)
         if (isWrongType(claims, "Access")) {
             /// 잘못된 타입이면 예외 발생 (예: Refresh Token 사용 시)
-            throw new RuntimeException("잘못된 타입!@");
+            throw new RuntimeException("AccessToken 아님.  잘못된 타입!@");
         }
 
         /// 3. 사용자 정보 조회 및 Principal 생성
@@ -126,30 +126,23 @@ public class JwtProvider {
 
     ///  토큰 타입 검사
     public boolean isWrongType(final Jws<Claims> claims, final String tokenType) {
-        log.info("---------------------isWrongType--------------------------------");
         Object t = claims.getBody().get("token_type");
         boolean type = (t == null) || !t.toString().equalsIgnoreCase(tokenType);
-        log.info("토큰타입검사:{}",type);
+        log.info("토큰타입검사 결과(true면 에러): {}", type);
         return type;
     }
 
     ///  Http 요청의 authorization를 헤더로 가져와서 헤더에서 extractToken메서드로 리턴
     public String extractTokenFromRequest(HttpServletRequest request) {
-        log.info("----------------------extractTokenFromRequest--------------------------");
-
         /// 1. Authorization 헤더 값 가져오기 (예시: "Bearer eyJhbGciOiJIUzI1Ni...")
-        log.info("HttpHeaders.AUTHORIZATION : {}",HttpHeaders.AUTHORIZATION);
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        log.info("authorizationHeader : {}", authorizationHeader);
         /// 2. 실제 토큰 문자열 추출 (extractToken 메서드 호출)
         String extractToken = extractToken(authorizationHeader);
-        log.info("extractToken: {}", extractToken);
         return extractToken;
     }
 
     /// 토큰이 비어있는지 확인 && Bearer로 시작하면 Bearer를 제거 후 리턴
     public String extractToken(final String token) {
-        log.info("--------------------extractToken-------------------------------");
         if(StringUtils.hasText(token)&&  token.startsWith("Bearer ")){
             return token.substring(7);
         }

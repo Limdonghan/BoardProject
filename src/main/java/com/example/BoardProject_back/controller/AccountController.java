@@ -1,6 +1,7 @@
 package com.example.BoardProject_back.controller;
 
 import com.example.BoardProject_back.dto.CreateDTO;
+import com.example.BoardProject_back.dto.UserInfoDTO;
 import com.example.BoardProject_back.service.AccountService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -8,10 +9,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.ResponseStatus;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 @RestController
 @Slf4j
@@ -28,9 +26,13 @@ public class AccountController {
     public ResponseEntity signup(@Validated CreateDTO createDTO){
         String encode = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encode);
-        createService.account_creative(createDTO);
+        createService.accountCreative(createDTO);
         return ResponseEntity.ok("회원가입성공하냐??!");
     }
 
-    ///  
+    /// 유저 정보 검색
+    @GetMapping("/find/account")
+    public ResponseEntity<UserInfoDTO> getCurrentUserInfo(){
+        return ResponseEntity.ok(createService.getCurrentUserInfo());
+    }
 }

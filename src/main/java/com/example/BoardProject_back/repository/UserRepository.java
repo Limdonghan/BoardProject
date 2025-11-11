@@ -10,9 +10,11 @@ import java.util.Optional;
 public interface UserRepository extends JpaRepository<UserEntity, Integer> {
 
 
-    ///  SpringSecurity 유저 검색용 ID( email )
+    ///  SpringSecurity, FindInfoUser 유저 검색용 ID( email )
     @Query("select m from UserEntity m where m.email=:email")
     Optional<UserEntity> findByEmail(@Param("email") String email);
+
+
 
 
 }
