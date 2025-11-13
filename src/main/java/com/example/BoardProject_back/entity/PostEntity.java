@@ -49,7 +49,7 @@ public class PostEntity {
 
     @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
-    private Boolean idDeleted;  // 게시글 삭제여부 TRUE = 삭제
+    private Boolean isDeleted;  // 게시글 삭제여부 TRUE = 삭제
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -61,6 +61,7 @@ public class PostEntity {
 
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;  //  게시글 삭제날짜
+
 
 
 
