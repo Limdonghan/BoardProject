@@ -48,8 +48,8 @@ public class PostEntity {
     private int disLikeCount;  // 게시글 싫어요 수
 
     @Column(name = "is_deleted", nullable = false)
-    @ColumnDefault("false")
-    private Boolean isDeleted;  // 게시글 삭제여부 TRUE = 삭제
+    @ColumnDefault("False")
+    private Boolean isDeleted = false;  // 게시글 삭제여부 TRUE = 삭제
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
