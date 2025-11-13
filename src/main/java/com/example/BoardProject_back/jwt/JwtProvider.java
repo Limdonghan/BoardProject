@@ -32,7 +32,7 @@ public class JwtProvider {
     private Key key;
 
     private final RedisTemplate<String, String> redisTemplate;
-    //private final RedisService redisService;
+    private final RedisService redisService;
 
 
     @PostConstruct
@@ -42,15 +42,22 @@ public class JwtProvider {
         this.key = Keys.hmacShaKeyFor(keyBytes);
     }
 
-    public Jws<Claims> getClaims(final String token) {  //jwt 토큰을 구문 분석하고 Claims을 반환, 토큰 유효성 확인
+    /// jwt 토큰을 구문 분석하고 Claims을 반환, 토큰 유효성 확인
+    public Jws<Claims> getClaims(final String token) {
         try {
             /// 1. Jwts.parser() 초기화
-            return Jwts.parserBuilder()
+            Jws<Claims> claimsJws = Jwts.parserBuilder()
                     /// 2. setSigningKey(key) - 서명 검증을 위한 키 설정 / 이미 생성된 Key객체 사용
                     .setSigningKey(key)
                     .build()
                     /// 3. parseClaimsJws(token) - 실제 토큰 파싱 및 검증 시도
                     .parseClaimsJws(token);
+
+            ///  블랙리스트 예외처리
+            if (redisService.keyBlackListCheck(token)) {
+                throw new RuntimeException("블랙리스트된 토큰입니다~!~!~!");
+            }
+            return claimsJws;
         } catch (ExpiredJwtException e) {
             /// 4. 예외 처리: 만료된 토큰
             throw new IllegalArgumentException("만료된 토큰");
@@ -87,14 +94,14 @@ public class JwtProvider {
                 .signWith(key, SignatureAlgorithm.HS256)
                 .compact();
         log.info("refreshToken : {}", refreshToken);
-        try{
+        try {
             redisTemplate.opsForValue().set(
                     loginID,
                     refreshToken,
                     jwtProperties.getRefreshExpiration(),
                     TimeUnit.MILLISECONDS
             );
-        }catch (Exception e){
+        } catch (Exception e) {
             System.out.println(e.getMessage());
         }
 
@@ -153,9 +160,8 @@ public class JwtProvider {
     public String extractTokenFromRequest(HttpServletRequest request) {
         /// 1. Authorization 헤더 값 가져오기 (예시: "Bearer eyJhbGciOiJIUzI1Ni...")
         String authorizationHeader = request.getHeader(HttpHeaders.AUTHORIZATION);
-        /// 2. 실제 토큰 문자열 추출 (extractToken 메서드 호출)
-        String extractToken = extractToken(authorizationHeader);
-        return extractToken;
+        /// 2. 실제 토큰 문자열 추출 후 리턴 (extractToken 메서드 호출)
+        return extractToken(authorizationHeader);
     }
 
     /// 토큰이 비어있는지 확인 && Bearer로 시작하면 Bearer를 제거 후 리턴

@@ -6,12 +6,18 @@ import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.jwt.JwtProvider;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.LoginService;
+import com.example.BoardProject_back.service.RedisService;
+import io.jsonwebtoken.Claims;
+import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +26,8 @@ public class LoginServiceImpl implements LoginService {
 
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
+    private final RedisService redisService;
+
     @Override
     public JwtTokenDTO authLogin(LoginDTO loginDTO) {
         log.info("UserPasswordAuthenticationToken 발급");
@@ -31,5 +39,23 @@ public class LoginServiceImpl implements LoginService {
                 .AccessToken(jwtProvider.createAccessToken(userDetails.getUserEntity().getEmail()))
                 .RefreshToken(jwtProvider.createRefreshToken(userDetails.getUserEntity().getEmail()))
                 .build();
+    }
+
+    @Override
+    @Transactional
+    public void logout(String accessToken) {
+        Jws<Claims> claims = jwtProvider.getClaims(accessToken);
+
+        /// AccessToken 유효시간 저장
+        Long expiration = jwtProvider.getExpiration(accessToken);
+
+        /// Refresh Token 삭제
+        redisService.refreshTokenDelete(claims.getBody().getSubject());
+
+        ///  Access Token 블랙리스트 등록
+        redisService.setValuesWithTimeout(accessToken,"logout",expiration);
+
+
+
     }
 }
