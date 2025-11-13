@@ -3,11 +3,9 @@ package com.example.BoardProject_back.dto;
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.stereotype.Service;
 
 @Getter
 @Setter
-@Service
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
