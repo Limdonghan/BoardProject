@@ -52,8 +52,8 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     public PostInfoDTO getPostInfo(int id, String accessToken) {
-        PostEntity postEntity = postRepository.findById(id)
-                .orElseThrow(() -> new IllegalArgumentException("해당 개시글이 존재하지 않음!!"));
+        PostEntity postEntity = postRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("해당 개시글이 존재하지 않거나 삭제된 게시글 입니다!!"));
 
 
         String nickName = postEntity.getUser().getNickName();
