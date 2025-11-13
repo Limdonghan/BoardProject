@@ -34,6 +34,8 @@ public class SecurityConfig {
                                         .requestMatchers("/api/user/createAccount").permitAll()
                                         .requestMatchers("/api/user/refresh").permitAll()
                                         .requestMatchers("/api/auth/**").permitAll()
+                                        .requestMatchers("/api/post/info/{id}").permitAll()
+                                        .requestMatchers("/api/post/**").authenticated()
                                         .anyRequest().authenticated()
                 )  /// 그 외의 요청은 인증된 사용자만 접근
                 .csrf(csrf -> csrf.disable())  /// JWT 사용 시 CSRF 보호 비활성화

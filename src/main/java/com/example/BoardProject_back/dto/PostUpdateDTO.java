@@ -1,19 +1,12 @@
 package com.example.BoardProject_back.dto;
 
 import jakarta.validation.constraints.NotNull;
-import lombok.*;
-import org.springframework.stereotype.Service;
-
-import java.time.LocalDateTime;
+import lombok.Getter;
+import lombok.NoArgsConstructor;
 
 @Getter
-@Setter
-@Service
-@AllArgsConstructor
 @NoArgsConstructor
-@Builder
-public class PostDTO {
-
+public class PostUpdateDTO {
     @NotNull
     private String title;
 
@@ -22,4 +15,5 @@ public class PostDTO {
 
     @NotNull
     private String context;
+
 }

@@ -48,8 +48,8 @@ public class PostEntity {
     private int disLikeCount;  // 게시글 싫어요 수
 
     @Column(name = "is_deleted", nullable = false)
-    @ColumnDefault("False")
-    private Boolean isDeleted = false;  // 게시글 삭제여부 TRUE = 삭제
+    @ColumnDefault("false")
+    private boolean isDeleted;  // 게시글 삭제여부 TRUE = 삭제
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -62,7 +62,17 @@ public class PostEntity {
     @Column(name = "deleted_at")
     private LocalDateTime deletedAt;  //  게시글 삭제날짜
 
+    /// 게시글 수정
+    public void postUpdate(String title, String context, CategoryEntity category){
+        this.title = title;
+        this.context = context;
+        this.category = category;
+    }
 
-
+    ///  게시글 삭제
+    public void postDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 
 }
