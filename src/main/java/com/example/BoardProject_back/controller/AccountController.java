@@ -1,12 +1,14 @@
 package com.example.BoardProject_back.controller;
 
 import com.example.BoardProject_back.dto.*;
+import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.AccountService;
 import com.example.BoardProject_back.service.AccountSettingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
@@ -24,7 +26,7 @@ public class AccountController {
     /// 회원가입
     @PostMapping("/createAccount")
     @ResponseStatus(HttpStatus.CREATED)  //회원가입메서드 이니깐 status = 201
-    public ResponseEntity signup(@Validated CreateDTO createDTO){
+    public ResponseEntity signup(@Validated CreateDTO createDTO) {
         String encode = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encode);
         accountService.accountCreative(createDTO);
@@ -32,8 +34,8 @@ public class AccountController {
     }
 
     /// 유저 정보 검색
-    @GetMapping("/find/account")
-    public ResponseEntity<UserInfoDTO> getCurrentUserInfo(){
+    @GetMapping("/me")
+    public ResponseEntity<UserInfoDTO> getCurrentUserInfo() {
         return ResponseEntity.ok(accountService.getCurrentUserInfo());
     }
 
@@ -45,9 +47,10 @@ public class AccountController {
 
 
     /// 유저 프로필 수정
-    @PutMapping("/update")
-    public ResponseEntity modifyUserInfo(@Validated @RequestBody UserUpdateProfileDTO userUpdateProfileDTO) {
-        accountSettingService.updateProfile(userUpdateProfileDTO);
+    @PatchMapping("/profile")
+    public ResponseEntity modifyUserInfo(@Validated @RequestBody UserUpdateProfileDTO userUpdateProfileDTO,
+                                         @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        accountSettingService.updateProfile(userUpdateProfileDTO, customUserDetails.getUserEntity());
         return ResponseEntity.ok("닉네임 변경 완료");
     }
 

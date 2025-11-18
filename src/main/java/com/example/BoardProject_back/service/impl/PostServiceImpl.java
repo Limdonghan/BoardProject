@@ -8,7 +8,6 @@ import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.repository.CategoryRepository;
 import com.example.BoardProject_back.repository.PostRepository;
-import com.example.BoardProject_back.security.CustomUserPrincipal;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,7 +20,6 @@ import java.time.LocalDateTime;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
-    private final CustomUserPrincipal customUserPrincipal;
 
 
     /**
@@ -29,8 +27,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postCreation(PostDTO postDTO) {
-        UserEntity userEntity = customUserPrincipal.customUserPrincipal();
+    public void postCreation(PostDTO postDTO, UserEntity userEntity) {
         CategoryEntity categoryEntity = categoryRepository.findById(postDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없음"));
 
@@ -76,8 +73,8 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postUpdate(int id, PostUpdateDTO postUpdateDTO) {
-        PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
+    public void postUpdate(int id, PostUpdateDTO postUpdateDTO, UserEntity userEntity) {
+        PostEntity post = postCheck(id, userEntity);
 
         CategoryEntity categoryEntity = categoryRepository.findById(postUpdateDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 카테고리가 없음!"));
@@ -95,8 +92,8 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postDelete(int id) {
-        PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
+    public void postDelete(int id, UserEntity userEntity) {
+        PostEntity post = postCheck(id, userEntity);
         post.postDelete();
 
     }

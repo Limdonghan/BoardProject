@@ -26,8 +26,7 @@ public class AccountSettingServiceImpl implements AccountSettingService {
      */
     @Override
     @Transactional
-    public void updateProfile(UserUpdateProfileDTO userUpdateProfileDTO) {
-        UserEntity userEntity = customUserPrincipal.customUserPrincipal();
+    public void updateProfile(UserUpdateProfileDTO userUpdateProfileDTO, UserEntity userEntity) {
         UserEntity byNickName = userRepository.findByNickName(userEntity.getNickName());
         if (byNickName.getNickName() == null) {
             throw new ResponseStatusException(HttpStatus.NOT_FOUND);
@@ -41,8 +40,7 @@ public class AccountSettingServiceImpl implements AccountSettingService {
      */
     @Override
     @Transactional
-    public void updatePassword(UserUpdatePassword userUpdatePassword) {
-        UserEntity userEntity = customUserPrincipal.customUserPrincipal();
+    public void updatePassword(UserUpdatePassword userUpdatePassword, UserEntity userEntity) {
         UserEntity user = userRepository.findByEmail(userEntity.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저"));
         if (!passwordEncoder.matches(userUpdatePassword.getOldPassword(), user.getPassword())) {

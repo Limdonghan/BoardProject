@@ -4,6 +4,7 @@ import com.example.BoardProject_back.jwt.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
+import org.springframework.http.HttpMethod;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.config.annotation.authentication.configuration.AuthenticationConfiguration;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
@@ -30,11 +31,10 @@ public class SecurityConfig {
         http.
                 authorizeHttpRequests(authorizeRequest ->
                                 authorizeRequest
-                                        .requestMatchers("/api/user/find/account").authenticated()
-                                        .requestMatchers("/api/user/createAccount").permitAll()
-                                        .requestMatchers("/api/user/refresh").permitAll()
+                                        .requestMatchers("/api/user/me").authenticated()
+                                        .requestMatchers(HttpMethod.POST,"/api/user/createAccount","/api/user/refresh").permitAll()
                                         .requestMatchers("/api/auth/**").permitAll()
-                                        .requestMatchers("/api/post/info/{id}").permitAll()
+                                        .requestMatchers(HttpMethod.GET,"/api/post/{id}").permitAll()
                                         .requestMatchers("/api/post/**").authenticated()
                                         .anyRequest().authenticated()
                 )  /// 그 외의 요청은 인증된 사용자만 접근
