@@ -10,6 +10,7 @@ import com.example.BoardProject_back.jwt.JwtProvider;
 import com.example.BoardProject_back.repository.CategoryRepository;
 import com.example.BoardProject_back.repository.PostRepository;
 import com.example.BoardProject_back.repository.UserRepository;
+import com.example.BoardProject_back.security.CustomUserPrincipal;
 import com.example.BoardProject_back.service.PostService;
 import io.jsonwebtoken.Claims;
 import io.jsonwebtoken.Jws;
@@ -26,6 +27,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
     private final JwtProvider jwtProvider;
+    private final CustomUserPrincipal customUserPrincipal;
 
 
     /**
@@ -34,7 +36,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void postCreation(PostDTO postDTO, String accessToken) {
-        UserEntity userEntity = tokenCheck(accessToken);
+        UserEntity userEntity = customUserPrincipal.customUserPrincipal();
         CategoryEntity categoryEntity = categoryRepository.findById(postDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없음"));
 
@@ -81,7 +83,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void postUpdate(int id, PostUpdateDTO postUpdateDTO, String accessToken) {
-        PostEntity post = postCheck(id, tokenCheck(accessToken));
+        PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
 
         CategoryEntity categoryEntity = categoryRepository.findById(postUpdateDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 카테고리가 없음!"));
@@ -92,7 +94,6 @@ public class PostServiceImpl implements PostService {
                 categoryEntity
         );
 
-
     }
 
     /**
@@ -101,21 +102,11 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void postDelete(int id, String accessToken) {
-        PostEntity post = postCheck(id, tokenCheck(accessToken));
+        PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
         post.postDelete();
 
     }
 
-    /**
-     * 작성자 검증
-     */
-    private UserEntity tokenCheck(String accessToken) {
-        ///  토큰 유효성체크
-        Jws<Claims> claims = jwtProvider.getClaims(jwtProvider.extractToken(accessToken));
-        String loginId = claims.getBody().get("loginID").toString();
-        return userRepository.findByEmail(loginId)
-                .orElseThrow(() -> new IllegalArgumentException("DB에 등록된 회원이 아님!"));
-    }
     /**
      * 게시글 체크
      */
