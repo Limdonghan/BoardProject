@@ -1,10 +1,8 @@
 package com.example.BoardProject_back.controller;
 
-import com.example.BoardProject_back.dto.CreateDTO;
-import com.example.BoardProject_back.dto.JwtTokenDTO;
-import com.example.BoardProject_back.dto.RefreshTokenDTO;
-import com.example.BoardProject_back.dto.UserInfoDTO;
+import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.service.AccountService;
+import com.example.BoardProject_back.service.AccountSettingService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.http.HttpStatus;
@@ -19,6 +17,7 @@ import org.springframework.web.bind.annotation.*;
 @RequestMapping("/api/user")
 public class AccountController {
     private final AccountService accountService;
+    private final AccountSettingService accountSettingService;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -42,6 +41,14 @@ public class AccountController {
     @PostMapping("/refresh")
     public JwtTokenDTO refresh(@Validated @RequestBody RefreshTokenDTO refreshTokenDTO) {
         return accountService.getRefreshToken(refreshTokenDTO.getRefreshToken());
+    }
+
+
+    /// 유저 프로필 수정
+    @PutMapping("/update")
+    public ResponseEntity modifyUserInfo(@Validated @RequestBody UserUpdateProfileDTO userUpdateProfileDTO) {
+        accountSettingService.updateProfile(userUpdateProfileDTO);
+        return ResponseEntity.ok("닉네임 변경 완료");
     }
 
 }

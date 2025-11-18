@@ -48,4 +48,8 @@ public class UserEntity {
     @UpdateTimestamp
     @Column(name = "updated_at")
     private LocalDateTime updatedAt; // 수정 날짜
+
+    public void userUpdate(String nickName){
+        this.nickName = nickName;
+    }
 }
