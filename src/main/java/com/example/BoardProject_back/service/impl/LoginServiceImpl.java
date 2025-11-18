@@ -13,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.authentication.AuthenticationManager;
 import org.springframework.security.authentication.UsernamePasswordAuthenticationToken;
 import org.springframework.security.core.Authentication;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -24,12 +25,17 @@ public class LoginServiceImpl implements LoginService {
     private final JwtProvider jwtProvider;
     private final AuthenticationManager authenticationManager;
     private final RedisService redisService;
+    private final PasswordEncoder passwordEncoder;
 
     @Override
     public JwtTokenDTO authLogin(LoginDTO loginDTO) {
         log.info("UserPasswordAuthenticationToken 발급");
         Authentication authentication = authenticationManager.authenticate(new UsernamePasswordAuthenticationToken(loginDTO.getLogin(), loginDTO.getPassword()));
         CustomUserDetails userDetails = (CustomUserDetails) authentication.getPrincipal();
+
+        if(!passwordEncoder.matches(loginDTO.getPassword(), userDetails.getPassword())){
+            throw new IllegalStateException("비밀번호가 일치하지 않음");
+        }
 
         return JwtTokenDTO.builder()
                 .loginMessage("로그인 성공!?!?!")

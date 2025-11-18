@@ -54,4 +54,12 @@ public class AccountController {
         return ResponseEntity.ok("닉네임 변경 완료");
     }
 
+    /// 유저 비밀번호 수정
+    @PatchMapping("password")
+    public ResponseEntity modifyUserPassword(@Validated @RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO,
+                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        accountSettingService.updatePassword(userUpdatePasswordDTO, customUserDetails.getUserEntity());
+        return ResponseEntity.ok("비밀번호 변경 완료");
+    }
+
 }

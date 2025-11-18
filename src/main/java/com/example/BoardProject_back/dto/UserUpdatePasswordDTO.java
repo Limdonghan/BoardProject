@@ -7,11 +7,11 @@ import lombok.Setter;
 @Getter
 @Setter
 @Builder
-public class UserUpdatePassword {
+public class UserUpdatePasswordDTO {
 
     private String oldPassword;
     private String newPassword;
-    public UserUpdatePassword(String oldPassword, String newPassword) {
+    public UserUpdatePasswordDTO(String oldPassword, String newPassword) {
         this.oldPassword = oldPassword;
         this.newPassword = newPassword;
     }

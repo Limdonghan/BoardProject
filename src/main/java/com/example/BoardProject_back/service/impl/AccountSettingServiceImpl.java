@@ -1,10 +1,9 @@
 package com.example.BoardProject_back.service.impl;
 
-import com.example.BoardProject_back.dto.UserUpdatePassword;
+import com.example.BoardProject_back.dto.UserUpdatePasswordDTO;
 import com.example.BoardProject_back.dto.UserUpdateProfileDTO;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.repository.UserRepository;
-import com.example.BoardProject_back.security.CustomUserPrincipal;
 import com.example.BoardProject_back.service.AccountSettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class AccountSettingServiceImpl implements AccountSettingService {
     private final UserRepository userRepository;
-    private final CustomUserPrincipal customUserPrincipal;
     private final PasswordEncoder passwordEncoder;
 
 
@@ -40,12 +38,15 @@ public class AccountSettingServiceImpl implements AccountSettingService {
      */
     @Override
     @Transactional
-    public void updatePassword(UserUpdatePassword userUpdatePassword, UserEntity userEntity) {
+    public void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO, UserEntity userEntity) {
         UserEntity user = userRepository.findByEmail(userEntity.getEmail())
                 .orElseThrow(() -> new IllegalArgumentException("존재하지 않는 유저"));
-        if (!passwordEncoder.matches(userUpdatePassword.getOldPassword(), user.getPassword())) {
+        /// 비밀번호 일치 체크
+        if (!passwordEncoder.matches(userUpdatePasswordDTO.getOldPassword(), user.getPassword())) {
             throw new IllegalStateException("비밀번호가 일치하지 않습니다!!!");
         }
-        userEntity.userUpdatePassword(userUpdatePassword.getNewPassword());
+        String newEncodePassword = passwordEncoder.encode(userUpdatePasswordDTO.getNewPassword());
+        user.userUpdatePassword(newEncodePassword);
+        userRepository.save(user);
     }
 }
