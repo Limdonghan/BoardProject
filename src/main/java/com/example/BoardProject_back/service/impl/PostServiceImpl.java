@@ -6,14 +6,10 @@ import com.example.BoardProject_back.dto.PostUpdateDTO;
 import com.example.BoardProject_back.entity.CategoryEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.UserEntity;
-import com.example.BoardProject_back.jwt.JwtProvider;
 import com.example.BoardProject_back.repository.CategoryRepository;
 import com.example.BoardProject_back.repository.PostRepository;
-import com.example.BoardProject_back.repository.UserRepository;
 import com.example.BoardProject_back.security.CustomUserPrincipal;
 import com.example.BoardProject_back.service.PostService;
-import io.jsonwebtoken.Claims;
-import io.jsonwebtoken.Jws;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -24,9 +20,7 @@ import java.time.LocalDateTime;
 @RequiredArgsConstructor
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
-    private final UserRepository userRepository;
     private final CategoryRepository categoryRepository;
-    private final JwtProvider jwtProvider;
     private final CustomUserPrincipal customUserPrincipal;
 
 

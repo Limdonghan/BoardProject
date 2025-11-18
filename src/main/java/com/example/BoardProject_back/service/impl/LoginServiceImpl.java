@@ -2,7 +2,6 @@ package com.example.BoardProject_back.service.impl;
 
 import com.example.BoardProject_back.dto.JwtTokenDTO;
 import com.example.BoardProject_back.dto.LoginDTO;
-import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.jwt.JwtProvider;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.LoginService;
@@ -16,8 +15,6 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.Authentication;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.util.concurrent.TimeUnit;
 
 @Service
 @RequiredArgsConstructor

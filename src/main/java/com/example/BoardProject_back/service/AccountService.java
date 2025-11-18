@@ -2,7 +2,6 @@ package com.example.BoardProject_back.service;
 
 import com.example.BoardProject_back.dto.CreateDTO;
 import com.example.BoardProject_back.dto.JwtTokenDTO;
-import com.example.BoardProject_back.dto.LoginDTO;
 import com.example.BoardProject_back.dto.UserInfoDTO;
 
 public interface AccountService {

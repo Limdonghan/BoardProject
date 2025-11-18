@@ -1,9 +1,7 @@
 package com.example.BoardProject_back.security;
 
 import com.example.BoardProject_back.entity.UserEntity;
-import com.example.BoardProject_back.repository.UserRepository;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.stereotype.Repository;
 

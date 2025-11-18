@@ -3,7 +3,6 @@ package com.example.BoardProject_back.controller;
 import com.example.BoardProject_back.dto.PostDTO;
 import com.example.BoardProject_back.dto.PostInfoDTO;
 import com.example.BoardProject_back.dto.PostUpdateDTO;
-import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
