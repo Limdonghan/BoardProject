@@ -7,13 +7,13 @@ import com.example.BoardProject_back.dto.PostUpdateDTO;
 
 public interface PostService {
 
-void postCreation(PostDTO postDTO, String accessToken);
+void postCreation(PostDTO postDTO);
 
-PostInfoDTO getPostInfo(int id, String accessToken);
+PostInfoDTO getPostInfo(int id);
 
-void postUpdate(int id, PostUpdateDTO postUpdateDTO, String accessToken);
+void postUpdate(int id, PostUpdateDTO postUpdateDTO);
 
-void postDelete(int id, String accessToken);
+void postDelete(int id);
 
 
 

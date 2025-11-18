@@ -17,30 +17,28 @@ public class PostController {
     private final PostService postService;
 
     @PostMapping("/creation")
-    public ResponseEntity postCreation(@Validated @RequestBody PostDTO postDTO, @RequestHeader("Authorization") String token) {
-        postService.postCreation(postDTO, token);
+    public ResponseEntity postCreation(@Validated @RequestBody PostDTO postDTO) {
+        postService.postCreation(postDTO);
         return ResponseEntity.ok("글 작성 완료");
     }
 
     @GetMapping("/info/{id}")
-    public ResponseEntity<PostInfoDTO> postInfo(@PathVariable int id, @RequestHeader(value = "Authorization", required = false ) String token) {
-        return ResponseEntity.ok(postService.getPostInfo(id, token));
+    public ResponseEntity<PostInfoDTO> postInfo(@PathVariable int id) {
+        return ResponseEntity.ok(postService.getPostInfo(id));
     }
 
     @PutMapping("/update/{id}")
     public ResponseEntity postUpdate(
             @PathVariable int id,
-            @Validated @RequestBody PostUpdateDTO postUpdateDTO,
-            @RequestHeader("Authorization") String token) {
-        postService.postUpdate(id,postUpdateDTO,token);
+            @Validated @RequestBody PostUpdateDTO postUpdateDTO) {
+        postService.postUpdate(id, postUpdateDTO);
         return ResponseEntity.ok("게시글 수정 완료");
     }
 
     @DeleteMapping("/{id}")
     public ResponseEntity postDelete(
-            @PathVariable int id,
-            @RequestHeader("Authorization") String token) {
-        postService.postDelete(id,token);
+            @PathVariable int id) {
+        postService.postDelete(id);
         return ResponseEntity.ok("게시글 삭제 완료");
     }
 

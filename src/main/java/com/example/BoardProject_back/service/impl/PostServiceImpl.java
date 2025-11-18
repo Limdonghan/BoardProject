@@ -35,7 +35,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postCreation(PostDTO postDTO, String accessToken) {
+    public void postCreation(PostDTO postDTO) {
         UserEntity userEntity = customUserPrincipal.customUserPrincipal();
         CategoryEntity categoryEntity = categoryRepository.findById(postDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없음"));
@@ -53,7 +53,7 @@ public class PostServiceImpl implements PostService {
      * 게시글 상세조회 (로그인 / 비로그인 다 가능)
      */
     @Override
-    public PostInfoDTO getPostInfo(int id, String accessToken) {
+    public PostInfoDTO getPostInfo(int id) {
         PostEntity postEntity = postRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 개시글이 존재하지 않거나 삭제된 게시글 입니다!!"));
 
@@ -82,7 +82,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postUpdate(int id, PostUpdateDTO postUpdateDTO, String accessToken) {
+    public void postUpdate(int id, PostUpdateDTO postUpdateDTO) {
         PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
 
         CategoryEntity categoryEntity = categoryRepository.findById(postUpdateDTO.getCategory())
@@ -101,7 +101,7 @@ public class PostServiceImpl implements PostService {
      */
     @Override
     @Transactional
-    public void postDelete(int id, String accessToken) {
+    public void postDelete(int id) {
         PostEntity post = postCheck(id, customUserPrincipal.customUserPrincipal());
         post.postDelete();
 
