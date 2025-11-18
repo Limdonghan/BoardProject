@@ -52,4 +52,7 @@ public class UserEntity {
     public void userUpdate(String nickName){
         this.nickName = nickName;
     }
+    public void userUpdatePassword(String newPassword){
+        this.password = newPassword;
+    }
 }
