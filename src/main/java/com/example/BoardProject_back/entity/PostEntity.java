@@ -75,4 +75,13 @@ public class PostEntity {
         this.deletedAt = LocalDateTime.now();
     }
 
+    /// 좋아요 / 싫어요 증가
+    public void likeHandle(int likeCount){
+        this.likeCount += 1;
+    }
+
+    public void disLikeHandle(int disLikeCount){
+        this.disLikeCount += 1;
+    }
+
 }

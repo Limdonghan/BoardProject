@@ -3,10 +3,12 @@ package com.example.BoardProject_back.service.impl;
 import com.example.BoardProject_back.dto.CommentDTO;
 import com.example.BoardProject_back.dto.CommentRespDTO;
 import com.example.BoardProject_back.entity.CommentEntity;
+import com.example.BoardProject_back.entity.PointRole;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.repository.CommentRepository;
 import com.example.BoardProject_back.repository.PostRepository;
+import com.example.BoardProject_back.repository.UserRepository;
 import com.example.BoardProject_back.service.CommentService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
@@ -23,9 +25,10 @@ public class CommentServiceImpl implements CommentService {
 
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
+    private final UserRepository userRepository;
 
     /**
-     * 게시글 작성
+     * 댓글 작성
      */
     @Override
     @Transactional
@@ -41,6 +44,10 @@ public class CommentServiceImpl implements CommentService {
                 .comment(commentDTO.getComment())
                 .build();
         commentRepository.save(commentEntity);
+
+        UserEntity user = userRepository.findById(userEntity.getId())
+                .orElseThrow(() -> new IllegalArgumentException("댓글을 작성한 유저를 찾을 수 없음??"));
+        user.userAddPoint(PointRole.WRITING_COMMENTS);
     }
 
     /**
