@@ -9,6 +9,7 @@ import com.example.BoardProject_back.repository.CategoryRepository;
 import com.example.BoardProject_back.repository.PostReactionRepository;
 import com.example.BoardProject_back.repository.PostRepository;
 import com.example.BoardProject_back.repository.UserRepository;
+import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -21,6 +22,7 @@ public class PostServiceImpl implements PostService {
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
     private final PostReactionRepository postReactionRepository;
+    private final GradeService gradeService;
 
 
     /**
@@ -43,7 +45,12 @@ public class PostServiceImpl implements PostService {
 
         UserEntity user = userRepository.findById(userEntity.getId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 작성한 유저를 찾을 수 없음 ??"));
+
+        /// 포인트 지급
         user.userAddPoint(PointRole.POST_CREATION);
+
+        /// 등급심사
+        gradeService.gradeAssessment(userEntity);
     }
 
     /**
@@ -172,10 +179,13 @@ public class PostServiceImpl implements PostService {
             if (author.getPoint() < 0) {
                 author.setPoint(0);
             }
-        } else
+        } else{
             throw new IllegalArgumentException("잘못된 처리 방식 입니다");
+        }
+
+        /// 게시글 작성자 등급 심사
+        gradeService.gradeAssessment(author);
 
     }
-
 
 }

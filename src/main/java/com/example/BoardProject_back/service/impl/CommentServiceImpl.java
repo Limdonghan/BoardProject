@@ -10,6 +10,7 @@ import com.example.BoardProject_back.repository.CommentRepository;
 import com.example.BoardProject_back.repository.PostRepository;
 import com.example.BoardProject_back.repository.UserRepository;
 import com.example.BoardProject_back.service.CommentService;
+import com.example.BoardProject_back.service.GradeService;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
@@ -26,6 +27,7 @@ public class CommentServiceImpl implements CommentService {
     private final CommentRepository commentRepository;
     private final PostRepository postRepository;
     private final UserRepository userRepository;
+    private final GradeService gradeService;
 
     /**
      * 댓글 작성
@@ -45,9 +47,16 @@ public class CommentServiceImpl implements CommentService {
                 .build();
         commentRepository.save(commentEntity);
 
+
         UserEntity user = userRepository.findById(userEntity.getId())
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 작성한 유저를 찾을 수 없음??"));
+
+        /// 포인트 지급
         user.userAddPoint(PointRole.WRITING_COMMENTS);
+
+        /// 등급심사
+        gradeService.gradeAssessment(user);
+
     }
 
     /**
