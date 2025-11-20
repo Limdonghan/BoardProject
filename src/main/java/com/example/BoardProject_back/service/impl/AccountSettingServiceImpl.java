@@ -4,7 +4,6 @@ import com.example.BoardProject_back.dto.UserUpdatePassword;
 import com.example.BoardProject_back.dto.UserUpdateProfileDTO;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.repository.UserRepository;
-import com.example.BoardProject_back.security.CustomUserPrincipal;
 import com.example.BoardProject_back.service.AccountSettingService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
@@ -17,7 +16,6 @@ import org.springframework.web.server.ResponseStatusException;
 @RequiredArgsConstructor
 public class AccountSettingServiceImpl implements AccountSettingService {
     private final UserRepository userRepository;
-    private final CustomUserPrincipal customUserPrincipal;
     private final PasswordEncoder passwordEncoder;
 
 
