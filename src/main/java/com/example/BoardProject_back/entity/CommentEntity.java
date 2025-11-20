@@ -33,8 +33,9 @@ public class CommentEntity {
     @Column(nullable = false)
     private String comment;  // 댓글 내용
 
+    @Column(name = "is_deleted", nullable = false)
     @ColumnDefault("false")
-    private boolean isDelete;  // 댓글 삭제여부 TRUE = 삭제
+    private boolean isDeleted;  // 댓글 삭제여부 TRUE = 삭제
 
     @CreationTimestamp
     @Column(name = "created_at", updatable = false)
@@ -45,4 +46,15 @@ public class CommentEntity {
     private LocalDateTime updatedAt;  //  댓글 수정날짜
 
     private LocalDateTime deletedAt;  //  댓글 삭제날짜
+
+    ///  댓글 수정
+    public void commentUpdate(String comment) {
+        this.comment = comment;
+    }
+
+    /// 댓글 삭제
+    public void commentDelete() {
+        this.isDeleted = true;
+        this.deletedAt = LocalDateTime.now();
+    }
 }
