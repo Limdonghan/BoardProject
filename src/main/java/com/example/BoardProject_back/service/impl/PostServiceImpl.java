@@ -2,6 +2,7 @@ package com.example.BoardProject_back.service.impl;
 
 import com.example.BoardProject_back.dto.PostDTO;
 import com.example.BoardProject_back.dto.PostInfoDTO;
+import com.example.BoardProject_back.dto.PostReactionDTO;
 import com.example.BoardProject_back.dto.PostUpdateDTO;
 import com.example.BoardProject_back.entity.CategoryEntity;
 import com.example.BoardProject_back.entity.PostEntity;
@@ -12,8 +13,6 @@ import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
-
-import java.time.LocalDateTime;
 
 @Service
 @RequiredArgsConstructor
@@ -44,7 +43,12 @@ public class PostServiceImpl implements PostService {
      * 게시글 상세조회 (로그인 / 비로그인 다 가능)
      */
     @Override
+    @Transactional
     public PostInfoDTO getPostInfo(int id) {
+
+        /// 게시글 조회수 증가
+        postRepository.increaseViewCount(id);
+
         PostEntity postEntity = postRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 개시글이 존재하지 않거나 삭제된 게시글 입니다!!"));
 
@@ -52,10 +56,6 @@ public class PostServiceImpl implements PostService {
         String nickName = postEntity.getUser().getNickName();
         String category = postEntity.getCategory().getCategory();
 
-        LocalDateTime date = postEntity.getCreatedAt();
-        if (!postEntity.getCreatedAt().equals(postEntity.getUpdatedAt())) {
-            date = postEntity.getUpdatedAt();
-        }
         return PostInfoDTO.builder()
                 .title(postEntity.getTitle())
                 .user(nickName)
@@ -64,7 +64,7 @@ public class PostServiceImpl implements PostService {
                 .postView(postEntity.getPostView())
                 .likeCount(postEntity.getLikeCount())
                 .disLikeCount(postEntity.getDisLikeCount())
-                .date(date)
+                .date(postEntity.getCreatedAt())
                 .build();
     }
 
@@ -112,6 +112,22 @@ public class PostServiceImpl implements PostService {
             throw new RuntimeException("작성자만 삭제/수정 할 수 있습니다.");
         }
         return post;
+    }
+
+    /**
+     * 게시글 좋아요 / 싫어요
+     */
+
+    @Override
+    @Transactional
+    public void handleReaction(int id, UserEntity userEntity, PostReactionDTO postReactionDTO) {
+        if (postReactionDTO.getRectionType().equals("LIKE")){
+            postRepository.increaseLikeCount(id);
+        }else if (postReactionDTO.getRectionType().equals("DISLIKE")){
+            postRepository.increaseDisLikeCount(id);
+        }else
+            throw new IllegalArgumentException("잘못된 처리 방식 입니다");
+
     }
 
 
