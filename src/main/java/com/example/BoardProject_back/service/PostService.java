@@ -3,6 +3,7 @@ package com.example.BoardProject_back.service;
 
 import com.example.BoardProject_back.dto.PostDTO;
 import com.example.BoardProject_back.dto.PostInfoDTO;
+import com.example.BoardProject_back.dto.PostReactionDTO;
 import com.example.BoardProject_back.dto.PostUpdateDTO;
 import com.example.BoardProject_back.entity.UserEntity;
 
@@ -15,6 +16,8 @@ PostInfoDTO getPostInfo(int id);
 void postUpdate(int id, PostUpdateDTO postUpdateDTO, UserEntity userEntity);
 
 void postDelete(int id, UserEntity userEntity);
+
+void handleReaction (int id, UserEntity userEntity, PostReactionDTO postReactionDTO);
 
 
 

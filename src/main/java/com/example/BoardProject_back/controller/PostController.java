@@ -2,6 +2,7 @@ package com.example.BoardProject_back.controller;
 
 import com.example.BoardProject_back.dto.PostDTO;
 import com.example.BoardProject_back.dto.PostInfoDTO;
+import com.example.BoardProject_back.dto.PostReactionDTO;
 import com.example.BoardProject_back.dto.PostUpdateDTO;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.PostService;
@@ -43,6 +44,16 @@ public class PostController {
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         postService.postDelete(id, customUserDetails.getUserEntity());
         return ResponseEntity.ok("게시글 삭제 완료");
+    }
+
+    @PostMapping("/{id}/reactions")
+    public ResponseEntity postReaction(
+            @PathVariable int id,
+            @RequestBody PostReactionDTO postReactionDTO,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+    ){
+        postService.handleReaction(id,customUserDetails.getUserEntity(),postReactionDTO);
+        return ResponseEntity.ok("반영완료");
     }
 
 }
