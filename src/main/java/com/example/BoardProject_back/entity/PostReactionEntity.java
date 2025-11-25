@@ -17,11 +17,11 @@ public class PostReactionEntity {
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "post_id")
-    private PostEntity post; /// 어떤 글인지
+    private PostEntity post; /// 어떤 게시글에 대한 반응인지
 
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "user_id")
-    private UserEntity user; /// 누가 눌렀는지
+    private UserEntity user; /// 누가 눌렀는지 (로그인한 사용자)
 
     @Column(nullable = false)
     private String reactionType; /// "LIKE" 또는 "DISLIKE"

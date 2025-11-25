@@ -131,7 +131,6 @@ public class PostServiceImpl implements PostService {
     /**
      * 게시글 좋아요 / 싫어요
      */
-
     @Override
     @Transactional
     public void handleReaction(int id, UserEntity userEntity, PostReactionDTO postReactionDTO) {
