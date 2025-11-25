@@ -1,11 +1,13 @@
 package com.example.BoardProject_back.service.impl;
 
 import com.example.BoardProject_back.dto.ReportDTO;
+import com.example.BoardProject_back.dto.ReportStatusDTO;
 import com.example.BoardProject_back.entity.*;
 import com.example.BoardProject_back.repository.*;
 import com.example.BoardProject_back.service.ReportService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 @Service
 @RequiredArgsConstructor
@@ -16,7 +18,6 @@ public class ReportServiceImpl implements ReportService {
     private final ReportStatusRepository reportStatusRepository;
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
-
 
     /**
      * 게시글 신고 등록
@@ -38,6 +39,7 @@ public class ReportServiceImpl implements ReportService {
         /// 댓글 조회
         CommentEntity commentEntity = commentRepository.findByIdAndIsDeletedFalse(commentId)
                 .orElseThrow(() -> new IllegalArgumentException("Comment id not found"));
+
         saveReport(userEntity,commentEntity.getUser(),reportDTO,null,commentEntity);
     }
 
@@ -65,5 +67,36 @@ public class ReportServiceImpl implements ReportService {
                 .build();
         reportRepository.save(reportEntity);
     }
+
+    /**
+     * 관리자 전용: 신고 처리 및 포인트 차감
+     */
+    @Override
+    @Transactional
+    public void changeReportStatus(int reportId, ReportStatusDTO reportStatusDTO) {
+        /// 신고 내역 조회
+        ReportEntity reportEntity = reportRepository.findById(reportId)
+                .orElseThrow(() -> new IllegalArgumentException("Report id not found"));
+
+        String targetStatusCode = reportStatusDTO.getStatus();
+
+        ReportStatusEntity newStatus = reportStatusRepository.findByCode(targetStatusCode)
+                        .orElseThrow(() -> new IllegalArgumentException("status code not found"));
+
+        /// 신고 상태 변경
+        reportEntity.setStatus(newStatus);
+
+        /// Status code가 RESOLVED 경우 포인트 차감
+        if (newStatus.getCode().equals("RESOLVED")){
+            /// 피신고자 조회
+            UserEntity reported = reportEntity.getReported();
+
+            /// 피신고자 포인트 차감
+            reported.userAddPoint(PointRole.REPORT_ACCUMULATION);
+        }
+
+    }
+
+
 
 }
