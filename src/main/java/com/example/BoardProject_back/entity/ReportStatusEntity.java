@@ -13,7 +13,7 @@ import java.time.LocalDateTime;
 @NoArgsConstructor(access = AccessLevel.PROTECTED)
 @AllArgsConstructor
 @Builder
-public class ReportStatusEntity {  // 신고 상태
+public class ReportStatusEntity {  // 신고 상태 테이블
 
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
