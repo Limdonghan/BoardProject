@@ -1,9 +1,6 @@
 package com.example.BoardProject_back.controller;
 
-import com.example.BoardProject_back.dto.PostDTO;
-import com.example.BoardProject_back.dto.PostInfoDTO;
-import com.example.BoardProject_back.dto.PostReactionDTO;
-import com.example.BoardProject_back.dto.PostUpdateDTO;
+import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
@@ -54,6 +51,11 @@ public class PostController {
     ){
         postService.handleReaction(id,customUserDetails.getUserEntity(),postReactionDTO);
         return ResponseEntity.ok("반영완료");
+    }
+
+    @GetMapping("my")
+    public MyPostListDTO getMyPostList(@AuthenticationPrincipal CustomUserDetails customUserDetails){
+        return postService.getMyPostList(customUserDetails.getUserEntity());
     }
 
 }

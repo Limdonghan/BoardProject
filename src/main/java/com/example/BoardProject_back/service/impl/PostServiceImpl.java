@@ -1,19 +1,16 @@
 package com.example.BoardProject_back.service.impl;
 
-import com.example.BoardProject_back.dto.PostDTO;
-import com.example.BoardProject_back.dto.PostInfoDTO;
-import com.example.BoardProject_back.dto.PostReactionDTO;
-import com.example.BoardProject_back.dto.PostUpdateDTO;
+import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.entity.*;
-import com.example.BoardProject_back.repository.CategoryRepository;
-import com.example.BoardProject_back.repository.PostReactionRepository;
-import com.example.BoardProject_back.repository.PostRepository;
-import com.example.BoardProject_back.repository.UserRepository;
+import com.example.BoardProject_back.repository.*;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 @RequiredArgsConstructor
@@ -23,6 +20,7 @@ public class PostServiceImpl implements PostService {
     private final UserRepository userRepository;
     private final PostReactionRepository postReactionRepository;
     private final GradeService gradeService;
+    private final CommentRepository commentRepository;
 
 
     /**
@@ -131,7 +129,6 @@ public class PostServiceImpl implements PostService {
     /**
      * 게시글 좋아요 / 싫어요
      */
-
     @Override
     @Transactional
     public void handleReaction(int id, UserEntity userEntity, PostReactionDTO postReactionDTO) {
@@ -188,4 +185,36 @@ public class PostServiceImpl implements PostService {
 
     }
 
+
+
+    /**
+     * 내가 작성한 게시글 목록 조회
+     */
+    @Override
+    public MyPostListDTO getMyPostList(UserEntity userEntity) {
+
+        /// 게시글 리스트 조회
+        List<PostEntity> myPost = postRepository.findAllByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(userEntity.getId());
+
+        /// 게시글 전체 수 조회
+        int totalPostCount = postRepository.countByUserIdAndIsDeletedFalse(userEntity.getId());
+
+        /// DTO 매핑
+        List<MyPostDTO> postDTOS = myPost.stream().map(
+                        postEntity -> MyPostDTO.builder()
+                                .id(postEntity.getId())
+                                .authorName(postEntity.getUser().getNickName())
+                                .title(postEntity.getTitle())
+                                .category(postEntity.getCategory().getCategory())
+                                .viewCount(postEntity.getPostView())
+                                .createDate(postEntity.getCreatedAt())
+                                .commentCount(commentRepository.countByPostIdAndIsDeletedFalse(postEntity.getId()))
+                                .build())
+                .collect(Collectors.toList());
+
+        return MyPostListDTO.builder()
+                .totalPostCount(totalPostCount)
+                .myPostList(postDTOS)
+                .build();
+    }
 }
