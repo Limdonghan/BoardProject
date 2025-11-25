@@ -4,11 +4,12 @@ import com.example.BoardProject_back.dto.PostDTO;
 import com.example.BoardProject_back.dto.PostInfoDTO;
 import com.example.BoardProject_back.dto.PostReactionDTO;
 import com.example.BoardProject_back.dto.PostUpdateDTO;
-import com.example.BoardProject_back.entity.CategoryEntity;
-import com.example.BoardProject_back.entity.PostEntity;
-import com.example.BoardProject_back.entity.UserEntity;
+import com.example.BoardProject_back.entity.*;
 import com.example.BoardProject_back.repository.CategoryRepository;
+import com.example.BoardProject_back.repository.PostReactionRepository;
 import com.example.BoardProject_back.repository.PostRepository;
+import com.example.BoardProject_back.repository.UserRepository;
+import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
@@ -19,6 +20,9 @@ import org.springframework.transaction.annotation.Transactional;
 public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
+    private final UserRepository userRepository;
+    private final PostReactionRepository postReactionRepository;
+    private final GradeService gradeService;
 
 
     /**
@@ -27,6 +31,7 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void postCreation(PostDTO postDTO, UserEntity userEntity) {
+
         CategoryEntity categoryEntity = categoryRepository.findById(postDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("해당 카테고리를 찾을 수 없음"));
 
@@ -37,6 +42,15 @@ public class PostServiceImpl implements PostService {
                 .context(postDTO.getContext())
                 .build();
         postRepository.save(build);
+
+        UserEntity user = userRepository.findById(userEntity.getId())
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 작성한 유저를 찾을 수 없음 ??"));
+
+        /// 포인트 지급
+        user.userAddPoint(PointRole.POST_CREATION);
+
+        /// 등급심사
+        gradeService.gradeAssessment(userEntity);
     }
 
     /**
@@ -121,14 +135,57 @@ public class PostServiceImpl implements PostService {
     @Override
     @Transactional
     public void handleReaction(int id, UserEntity userEntity, PostReactionDTO postReactionDTO) {
-        if (postReactionDTO.getRectionType().equals("LIKE")){
-            postRepository.increaseLikeCount(id);
-        }else if (postReactionDTO.getRectionType().equals("DISLIKE")){
-            postRepository.increaseDisLikeCount(id);
-        }else
+        /// 게시글 찾기
+        PostEntity postEntity = postRepository.findByIdAndIsDeletedFalse(id)
+                .orElseThrow(() -> new IllegalArgumentException("게시글을 찾을 수 없음! 존재하지 않거나 삭제된것임"));
+
+        /// 게시글 작성자 찾기
+        UserEntity author = postEntity.getUser();
+
+        /// 중복 반응 체크 (이미 좋아요 또는 싫어요가 눌렸는치 체크)
+        if(postReactionRepository.existsByUserAndPost(userEntity, postEntity)){
+            throw new IllegalStateException("이미 반응을 남겼습니다!");
+        }
+
+        /// 처음으로 반응(좋야요 or 싫어요)할 때 저장
+        PostReactionEntity build = PostReactionEntity.builder()
+                .post(postEntity)
+                .user(userEntity)
+                .reactionType(postReactionDTO.getRectionType())
+                .build();
+        postReactionRepository.save(build);
+
+
+        /// 포인트 자추 금지
+        boolean isSelfReaction = author.getEmail().equals(userEntity.getEmail());
+
+        if (postReactionDTO.getRectionType().equals("LIKE")) {
+            postEntity.likeHandle(postEntity.getLikeCount());       /// 좋아요 증가
+
+            /// 본인이 작성한 게시글이 아는글에 좋아요를 누르면 포인트 지급
+            if (!isSelfReaction) {
+                author.userAddPoint(PointRole.LIKE);
+            }
+
+        } else if (postReactionDTO.getRectionType().equals("DISLIKE")) {
+            postEntity.disLikeHandle(postEntity.getDisLikeCount());  /// 싫어요 증가
+
+            /// 본인이 작성한 게시글이 아는글에 싫어요를 누르면 포인트 감소
+            if (!isSelfReaction) {
+                author.userAddPoint(PointRole.DISLIKE);
+            }
+
+            /// 포인트가 -1이 되면 0으로 초기화
+            if (author.getPoint() < 0) {
+                author.setPoint(0);
+            }
+        } else{
             throw new IllegalArgumentException("잘못된 처리 방식 입니다");
+        }
+
+        /// 게시글 작성자 등급 심사
+        gradeService.gradeAssessment(author);
 
     }
-
 
 }

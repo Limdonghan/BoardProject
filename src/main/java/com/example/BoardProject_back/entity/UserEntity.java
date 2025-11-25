@@ -55,4 +55,10 @@ public class UserEntity {
     public void userUpdatePassword(String newPassword){
         this.password = newPassword;
     }
+
+    /// 포인트 증가
+    public void userAddPoint(PointRole pointRole){
+        this.point += pointRole.getPoint();
+    }
+
 }
