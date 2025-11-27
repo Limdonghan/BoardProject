@@ -6,6 +6,8 @@ import com.example.BoardProject_back.repository.*;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -216,5 +218,14 @@ public class PostServiceImpl implements PostService {
                 .totalPostCount(totalPostCount)
                 .myPostList(postDTOS)
                 .build();
+    }
+
+    /**
+     * Pageable
+     */
+    @Override
+    public Page<PostListPageDTO> getBoardList(Pageable pageable) {
+        Page<PostEntity> postPage = postRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc(pageable);
+        return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
     }
 }

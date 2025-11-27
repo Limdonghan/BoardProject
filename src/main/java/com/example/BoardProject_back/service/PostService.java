@@ -3,6 +3,8 @@ package com.example.BoardProject_back.service;
 
 import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.entity.UserEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 
 public interface PostService {
 
@@ -18,6 +20,7 @@ void handleReaction (int id, UserEntity userEntity, PostReactionDTO postReaction
 
 MyPostListDTO getMyPostList(UserEntity userEntity);
 
+Page<PostListPageDTO> getBoardList(Pageable pageable);
 
 
 
