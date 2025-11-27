@@ -19,6 +19,7 @@ bin/
 
 ### Config files ###
 src/main/resources/application.properties
+src/main/resources/docker-compost.yml
 
 ### IntelliJ IDEA ###
 .idea
@@ -41,3 +42,6 @@ out/
 
 ### TestFile ###
 src/test
+
+### Typesence Data ###
+src/main/resources/typesense-data
