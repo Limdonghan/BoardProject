@@ -17,6 +17,7 @@ public class MyPostDTO {
     private String title;               /// 글 제목
     private String category;            /// 글 카테고리 (Enum이나 String)
     private int viewCount;              /// 조회수
+    private int likeCount;              /// 좋아요 수
     private LocalDateTime createDate;   /// 생성 날짜
 
     private int commentCount;           /// 이 글에 달린 댓글 수

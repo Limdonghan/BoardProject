@@ -201,6 +201,9 @@ public class PostServiceImpl implements PostService {
         /// 게시글 전체 수 조회
         int totalPostCount = postRepository.countByUserIdAndIsDeletedFalse(userEntity.getId());
 
+        /// 게시글 수 조회
+        int totalLike;
+
         /// DTO 매핑
         List<MyPostDTO> postDTOS = myPost.stream().map(
                         postEntity -> MyPostDTO.builder()
@@ -209,6 +212,7 @@ public class PostServiceImpl implements PostService {
                                 .title(postEntity.getTitle())
                                 .category(postEntity.getCategory().getCategory())
                                 .viewCount(postEntity.getPostView())
+                                .likeCount(postEntity.getLikeCount()-postEntity.getDisLikeCount())
                                 .createDate(postEntity.getCreatedAt())
                                 .commentCount(commentRepository.countByPostIdAndIsDeletedFalse(postEntity.getId()))
                                 .build())
