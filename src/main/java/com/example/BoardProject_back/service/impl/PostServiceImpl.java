@@ -6,6 +6,8 @@ import com.example.BoardProject_back.repository.*;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import lombok.RequiredArgsConstructor;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -199,6 +201,9 @@ public class PostServiceImpl implements PostService {
         /// 게시글 전체 수 조회
         int totalPostCount = postRepository.countByUserIdAndIsDeletedFalse(userEntity.getId());
 
+        /// 게시글 수 조회
+        int totalLike;
+
         /// DTO 매핑
         List<MyPostDTO> postDTOS = myPost.stream().map(
                         postEntity -> MyPostDTO.builder()
@@ -207,6 +212,7 @@ public class PostServiceImpl implements PostService {
                                 .title(postEntity.getTitle())
                                 .category(postEntity.getCategory().getCategory())
                                 .viewCount(postEntity.getPostView())
+                                .likeCount(postEntity.getLikeCount()-postEntity.getDisLikeCount())
                                 .createDate(postEntity.getCreatedAt())
                                 .commentCount(commentRepository.countByPostIdAndIsDeletedFalse(postEntity.getId()))
                                 .build())
@@ -216,5 +222,14 @@ public class PostServiceImpl implements PostService {
                 .totalPostCount(totalPostCount)
                 .myPostList(postDTOS)
                 .build();
+    }
+
+    /**
+     * Pageable
+     */
+    @Override
+    public Page<PostListPageDTO> getBoardList(Pageable pageable) {
+        Page<PostEntity> postPage = postRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc(pageable);
+        return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
     }
 }
