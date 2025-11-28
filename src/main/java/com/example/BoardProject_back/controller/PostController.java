@@ -3,6 +3,7 @@ package com.example.BoardProject_back.controller;
 import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.PostService;
+import com.example.BoardProject_back.service.TypesenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -13,11 +14,14 @@ import org.springframework.security.core.annotation.AuthenticationPrincipal;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
+
 @RestController
 @RequiredArgsConstructor
 @RequestMapping("/api/post")
 public class PostController {
     private final PostService postService;
+    private final TypesenseService typesenseService;
 
     @PostMapping()
     public ResponseEntity postCreation(@Validated @RequestBody PostDTO postDTO, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -70,5 +74,10 @@ public class PostController {
         Page<PostListPageDTO> list = postService.getBoardList(pageable);
         return ResponseEntity.ok(list);
 
+    }
+
+    @GetMapping("/search")
+    public ResponseEntity<List<PostSearchResultDTO>> searchPosts(@RequestParam("query") String query) {
+        return ResponseEntity.ok(typesenseService.search(query));
     }
 }

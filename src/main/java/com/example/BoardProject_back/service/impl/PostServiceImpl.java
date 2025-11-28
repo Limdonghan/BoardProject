@@ -5,6 +5,7 @@ import com.example.BoardProject_back.entity.*;
 import com.example.BoardProject_back.repository.*;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
+import com.example.BoardProject_back.service.TypesenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -23,6 +24,7 @@ public class PostServiceImpl implements PostService {
     private final PostReactionRepository postReactionRepository;
     private final GradeService gradeService;
     private final CommentRepository commentRepository;
+    private final TypesenseService typesenseService;
 
 
     /**
@@ -41,7 +43,7 @@ public class PostServiceImpl implements PostService {
                 .category(categoryEntity)
                 .context(postDTO.getContext())
                 .build();
-        postRepository.save(build);
+        PostEntity savedPost = postRepository.save(build);
 
         UserEntity user = userRepository.findById(userEntity.getId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 작성한 유저를 찾을 수 없음 ??"));
@@ -51,6 +53,9 @@ public class PostServiceImpl implements PostService {
 
         /// 등급심사
         gradeService.gradeAssessment(userEntity);
+
+        /// typesense 저장
+        typesenseService.indexPost(savedPost);
     }
 
     /**
@@ -99,6 +104,8 @@ public class PostServiceImpl implements PostService {
                 categoryEntity
         );
 
+        /// typesense 저장
+        typesenseService.indexPost(post);
     }
 
     /**
@@ -109,6 +116,9 @@ public class PostServiceImpl implements PostService {
     public void postDelete(int id, UserEntity userEntity) {
         PostEntity post = postCheck(id, userEntity);
         post.postDelete();
+
+        /// typesense 삭제
+        typesenseService.deletePost(id);
 
     }
 
@@ -200,9 +210,6 @@ public class PostServiceImpl implements PostService {
 
         /// 게시글 전체 수 조회
         int totalPostCount = postRepository.countByUserIdAndIsDeletedFalse(userEntity.getId());
-
-        /// 게시글 수 조회
-        int totalLike;
 
         /// DTO 매핑
         List<MyPostDTO> postDTOS = myPost.stream().map(
