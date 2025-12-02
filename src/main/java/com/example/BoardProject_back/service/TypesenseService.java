@@ -150,4 +150,15 @@ public class TypesenseService {
         log.info("Created Typesense collection '{}'", COLLECTION_NAME);
     }
 
+    /// 게시글 리스트를 받아서 싹 다 넣는 메서드
+    public void indexAllPosts(List<PostEntity> posts) {
+        log.info("기존 데이터 동기화 시작: 총 {}개", posts.size());
+
+        for (PostEntity post : posts) {
+            /// 기존에 만들어둔 단건 등록 메서드 재활용!
+            indexPost(post);
+        }
+
+        log.info("기존 데이터 동기화 완료!");
+    }
 }
