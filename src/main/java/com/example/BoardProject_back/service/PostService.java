@@ -22,6 +22,8 @@ MyPostListDTO getMyPostList(UserEntity userEntity);
 
 Page<PostListPageDTO> getBoardList(Pageable pageable);
 
+Page<PostListPageDTO> getCategoryBoardList(Pageable pageable, int categoryId);
+
 
 
 }

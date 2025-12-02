@@ -76,6 +76,17 @@ public class PostController {
 
     }
 
+    @GetMapping("/{categoryId}/lists")
+    public ResponseEntity<Page<PostListPageDTO>> getCategoryBoardList(
+            @PathVariable int categoryId,
+            /// page: 현재 페이지 (0부터 시작), size: 한 페이지 게시글 수, sort: 정렬 기준, direction: 정렬 방식
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
+    ) {
+        Page<PostListPageDTO> list = postService.getCategoryBoardList(pageable, categoryId);
+        return ResponseEntity.ok(list);
+
+    }
+
     @GetMapping("/search")
     public ResponseEntity<List<PostSearchResultDTO>> searchPosts(@RequestParam("query") String query) {
         return ResponseEntity.ok(typesenseService.search(query));

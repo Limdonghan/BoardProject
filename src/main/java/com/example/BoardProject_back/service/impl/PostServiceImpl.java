@@ -232,11 +232,22 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     * Pageable
+     * Pageable 전체
      */
     @Override
     public Page<PostListPageDTO> getBoardList(Pageable pageable) {
         Page<PostEntity> postPage = postRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc(pageable);
         return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
     }
+
+
+    /**
+     * Pageable 카테고리별
+     */
+    @Override
+    public Page<PostListPageDTO> getCategoryBoardList(Pageable pageable, int categoryId) {
+        Page<PostEntity> postPage = postRepository.findAllByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(pageable, categoryId);
+        return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
+    }
+
 }

@@ -34,6 +34,7 @@ public class SecurityConfig {
                                         .requestMatchers(HttpMethod.POST,"/api/user/createAccount","/api/user/refresh").permitAll()
                                         .requestMatchers("/api/auth/**").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/lists").permitAll()
+                                        .requestMatchers(HttpMethod.GET,"/api/post/{categoryId}/lists").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/{id}").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/{postId}/comment").permitAll()
                                         .anyRequest().authenticated()
