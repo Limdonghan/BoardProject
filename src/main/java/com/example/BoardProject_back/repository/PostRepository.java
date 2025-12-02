@@ -23,5 +23,9 @@ public interface PostRepository extends JpaRepository<PostEntity,Integer> {
 
     int countByUserIdAndIsDeletedFalse(int userId);
 
+    /// 페이지네이션 전체조회
     Page<PostEntity>  findAllByIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    /// 페이지네이션 카테고리별조회
+    Page<PostEntity> findAllByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable, int categoryId);
 }
