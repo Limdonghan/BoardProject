@@ -57,6 +57,19 @@ public class ReportServiceImpl implements ReportService {
         ReportStatusEntity statusId = reportStatusRepository.findById(1)
                 .orElseThrow(() -> new IllegalArgumentException("Status id not found"));
 
+        /// 본인 신고 금지
+        if (reporter.getId() == (reported.getId())){
+            throw new IllegalArgumentException("본인이 작성한 글은 본인이 신고는 못해요");
+        }
+
+        /// 중복 신고 금지
+        if (postEntity != null && reportRepository.existsByReporterIdAndPostId(reporter.getId(), postEntity.getId())) {
+            throw new IllegalStateException("이미 신고한 게시글입니다.");
+        }else if (commentEntity != null && reportRepository.existsByReporterIdAndCommentId(reporter.getId(), commentEntity.getId())){
+            throw new IllegalArgumentException("이미 신고한 댓글입니다.");
+        }
+
+
         ReportEntity reportEntity = ReportEntity.builder()
                 .reporter(reporter)
                 .reported(reported)
