@@ -1,5 +1,6 @@
 package com.example.BoardProject_back.controller;
 
+import com.example.BoardProject_back.dto.ReportDetailDTO;
 import com.example.BoardProject_back.dto.ReportListDTO;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.repository.PostRepository;
@@ -13,6 +14,7 @@ import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RestController;
 
@@ -44,5 +46,13 @@ public class AdminController {
         Page<ReportListDTO> reportList = adminService.getReportList(pageable);
 
         return ResponseEntity.ok(reportList);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("/{reportId}")
+    public ResponseEntity<ReportDetailDTO> getReportDetailDTOResponseEntity(@PathVariable int reportId) {
+        ReportDetailDTO reportDetail = adminService.getReportDetail(reportId);
+        return ResponseEntity.ok(reportDetail);
+
     }
 }
