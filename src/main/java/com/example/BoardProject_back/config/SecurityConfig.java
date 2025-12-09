@@ -32,6 +32,7 @@ public class SecurityConfig {
                 authorizeHttpRequests(authorizeRequest ->
                                 authorizeRequest
                                         .requestMatchers(HttpMethod.POST,"/api/user/createAccount","/api/user/refresh").permitAll()
+                                        .requestMatchers(HttpMethod.GET,"/api/user/check-nickname").permitAll()
                                         .requestMatchers("/api/auth/**").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/lists").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/{categoryId}/lists").permitAll()

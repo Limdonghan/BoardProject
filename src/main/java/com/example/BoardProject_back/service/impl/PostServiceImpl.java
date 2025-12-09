@@ -81,7 +81,7 @@ public class PostServiceImpl implements PostService {
                 .category(category)
                 .context(postEntity.getContext())
                 .postView(postEntity.getPostView())
-                .likeCount(postEntity.getLikeCount())
+                .likeCount(postEntity.getLikeCount()-postEntity.getDisLikeCount())
                 .disLikeCount(postEntity.getDisLikeCount())
                 .date(postEntity.getCreatedAt())
                 .build();
