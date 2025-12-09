@@ -10,4 +10,6 @@ public interface AccountSettingService {
 
     void updatePassword(UserUpdatePasswordDTO userUpdatePasswordDTO, UserEntity userEntity);
 
+    boolean isNicknameDuplicate(String nickname);
+
 }
