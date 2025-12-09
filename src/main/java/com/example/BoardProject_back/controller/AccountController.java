@@ -62,4 +62,15 @@ public class AccountController {
         return ResponseEntity.ok("비밀번호 변경 완료");
     }
 
+
+    /// 유저 닉네임 중복체크
+    /// GET /api/account/check-nickname?nickname=사용자입력값
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam String nickname) {
+        boolean isDuplicate =  accountSettingService.isNicknameDuplicate(nickname);
+
+        /// 중복이면 true, 사용 가능하면 false 반환
+        return ResponseEntity.ok(isDuplicate);
+    }
+
 }
