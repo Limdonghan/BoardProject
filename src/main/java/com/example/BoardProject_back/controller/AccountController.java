@@ -26,7 +26,7 @@ public class AccountController {
     /// 회원가입
     @PostMapping("/createAccount")
     @ResponseStatus(HttpStatus.CREATED)  //회원가입메서드 이니깐 status = 201
-    public ResponseEntity signup(@Validated CreateDTO createDTO) {
+    public ResponseEntity signup(@Validated @RequestBody CreateDTO createDTO) {
         String encode = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encode);
         accountService.accountCreative(createDTO);
