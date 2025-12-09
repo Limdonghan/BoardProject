@@ -31,6 +31,25 @@ public class AdminServiceImpl implements AdminService {
     }
 
     /**
+     * 신고 페이지네이션 - 게시글 및 신고상태별 댓글 및 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getPostAndStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatusIdAndPostOrderByCreatedAtDesc(pageable,statusId);
+        return reportPage.map(report -> new ReportListDTO(report));
+    }
+
+    /**
+     * 신고 페이지네이션 - 댓글 및 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getCommendAndStatusList(Pageable pageable,  int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatusIdAndCommentOrderByCreatedAtDesc(pageable,statusId);
+        return reportPage.map(report -> new ReportListDTO(report));
+    }
+
+
+    /**
      * 신고 상세 페이지
      */
     @Override

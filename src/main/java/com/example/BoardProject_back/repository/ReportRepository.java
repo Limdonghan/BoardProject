@@ -26,4 +26,11 @@ public interface ReportRepository extends JpaRepository<ReportEntity,Integer> {
     /// 유저가 게시글 or 댓글에 신고를 한 적 있는지 체크(한번만 가능하도록)
     boolean existsByReporterIdAndPostId(int reporterId, int postId);
     boolean existsByReporterIdAndCommentId(int reporterId, int commentId);
+
+    /// 페이지네이션 게시글 및 신고상태별
+    Page<ReportEntity> findAllByStatusIdAndPostOrderByCreatedAtDesc(Pageable pageable, int statusId);
+
+
+    /// 페이지네이션 댓글 및 신고상태별
+    Page<ReportEntity> findAllByStatusIdAndCommentOrderByCreatedAtDesc(Pageable pageable, int statusId);
 }
