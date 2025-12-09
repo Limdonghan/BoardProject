@@ -70,6 +70,7 @@ public class AccountServiceImpl implements AccountService {
                 .grade(grade)
                 .points(userEntity.getPoint())
                 .role(userEntity.getUserRole().toString())
+                .createdAt(userEntity.getCreatedAt())
                 .build();
     }
 
