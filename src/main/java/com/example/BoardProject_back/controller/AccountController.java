@@ -26,7 +26,7 @@ public class AccountController {
     /// 회원가입
     @PostMapping("/createAccount")
     @ResponseStatus(HttpStatus.CREATED)  //회원가입메서드 이니깐 status = 201
-    public ResponseEntity signup(@Validated CreateDTO createDTO) {
+    public ResponseEntity signup(@Validated @RequestBody CreateDTO createDTO) {
         String encode = passwordEncoder.encode(createDTO.getPassword());
         createDTO.setPassword(encode);
         accountService.accountCreative(createDTO);
@@ -52,6 +52,25 @@ public class AccountController {
                                          @AuthenticationPrincipal CustomUserDetails customUserDetails) {
         accountSettingService.updateProfile(userUpdateProfileDTO, customUserDetails.getUserEntity());
         return ResponseEntity.ok("닉네임 변경 완료");
+    }
+
+    /// 유저 비밀번호 수정
+    @PatchMapping("password")
+    public ResponseEntity modifyUserPassword(@Validated @RequestBody UserUpdatePasswordDTO userUpdatePasswordDTO,
+                                             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+        accountSettingService.updatePassword(userUpdatePasswordDTO, customUserDetails.getUserEntity());
+        return ResponseEntity.ok("비밀번호 변경 완료");
+    }
+
+
+    /// 유저 닉네임 중복체크
+    /// GET /api/account/check-nickname?nickname=사용자입력값
+    @GetMapping("/check-nickname")
+    public ResponseEntity<Boolean> checkNickname(@RequestParam String nickname) {
+        boolean isDuplicate =  accountSettingService.isNicknameDuplicate(nickname);
+
+        /// 중복이면 true, 사용 가능하면 false 반환
+        return ResponseEntity.ok(isDuplicate);
     }
 
 }

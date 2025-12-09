@@ -22,10 +22,10 @@ public class GradeEntity {
     @Column(nullable = false, unique = true, length = 50)
     private String grade;  // 등급명 (예: Bronze, Silver, Gold)
 
-    @Column(nullable = false)
+    @Column(name = "max_point", nullable = false)
     private int maxPoints; // 해당 등급의 최대 포인트
 
-    @Column(nullable = false)
+    @Column(name = "min_point", nullable = false)
     private int minPoints; // 해당 등급의 최소 포인트
 
     @CreationTimestamp

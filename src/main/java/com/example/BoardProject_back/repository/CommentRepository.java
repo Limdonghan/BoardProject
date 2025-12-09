@@ -12,4 +12,6 @@ public interface CommentRepository extends JpaRepository<CommentEntity, Integer>
 
     Optional<CommentEntity> findByIdAndIsDeletedFalse(int id);
 
+    int countByPostIdAndIsDeletedFalse(int postId);
+
 }

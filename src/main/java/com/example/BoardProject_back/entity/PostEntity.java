@@ -4,6 +4,7 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
@@ -74,5 +75,17 @@ public class PostEntity {
         this.isDeleted = true;
         this.deletedAt = LocalDateTime.now();
     }
+
+    /// 좋아요 / 싫어요 증가
+    public void likeHandle(int likeCount){
+        this.likeCount += 1;
+    }
+
+    public void disLikeHandle(int disLikeCount){
+        this.disLikeCount += 1;
+    }
+
+    @Formula("(SELECT count(1) FROM comments c WHERE c.post_id = id AND c.is_deleted = FALSE)")
+    private int commentCount;
 
 }
