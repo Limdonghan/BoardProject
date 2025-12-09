@@ -70,7 +70,7 @@ public class AdminController {
     public ResponseEntity<Page<ReportListDTO>> getReportListCommentAndStatusDTOResponseEntity(
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
             @PathVariable int statusId) {
-        Page<ReportListDTO> reportList = adminService.getCommendAndStatusList(pageable, statusId);
+        Page<ReportListDTO> reportList = adminService.getCommentAndStatusList(pageable, statusId);
         return ResponseEntity.ok(reportList);
     }
 }

@@ -35,7 +35,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public Page<ReportListDTO> getPostAndStatusList(Pageable pageable, int statusId) {
-        Page<ReportEntity> reportPage = reportRepository.findAllByStatusIdAndPostOrderByCreatedAtDesc(pageable,statusId);
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(pageable,statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
 
@@ -43,8 +43,8 @@ public class AdminServiceImpl implements AdminService {
      * 신고 페이지네이션 - 댓글 및 신고상태별
      */
     @Override
-    public Page<ReportListDTO> getCommendAndStatusList(Pageable pageable,  int statusId) {
-        Page<ReportEntity> reportPage = reportRepository.findAllByStatusIdAndCommentOrderByCreatedAtDesc(pageable,statusId);
+    public Page<ReportListDTO> getCommentAndStatusList(Pageable pageable,  int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(pageable,statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
 

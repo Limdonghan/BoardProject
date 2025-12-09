@@ -28,9 +28,9 @@ public interface ReportRepository extends JpaRepository<ReportEntity,Integer> {
     boolean existsByReporterIdAndCommentId(int reporterId, int commentId);
 
     /// 페이지네이션 게시글 및 신고상태별
-    Page<ReportEntity> findAllByStatusIdAndPostOrderByCreatedAtDesc(Pageable pageable, int statusId);
+    Page<ReportEntity> findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(Pageable pageable, int statusId);
 
 
     /// 페이지네이션 댓글 및 신고상태별
-    Page<ReportEntity> findAllByStatusIdAndCommentOrderByCreatedAtDesc(Pageable pageable, int statusId);
+    Page<ReportEntity> findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(Pageable pageable, int statusId);
 }
