@@ -5,6 +5,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Builder;
 import lombok.Getter;
 
+import java.time.LocalDateTime;
+
 @Getter
 @Builder
 public class UserInfoDTO {
@@ -24,5 +26,8 @@ public class UserInfoDTO {
 
     @NotNull
     private final String role;
+
+    @NotNull
+    private final LocalDateTime createdAt;
 
 }

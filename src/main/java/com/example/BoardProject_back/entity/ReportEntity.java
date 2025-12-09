@@ -53,4 +53,10 @@ public class ReportEntity {
     private LocalDateTime updatedAt; // 수정 날짜
 
 
+    /// 신고 처리 상태 업데이트
+    public void statusUpdate(ReportStatusEntity status){
+        this.status = status;
+    }
+
+
 }

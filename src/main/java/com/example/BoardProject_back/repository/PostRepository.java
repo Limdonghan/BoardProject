@@ -1,6 +1,8 @@
 package com.example.BoardProject_back.repository;
 
 import com.example.BoardProject_back.entity.PostEntity;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.Pageable;
 import org.springframework.data.jpa.repository.JpaRepository;
 import org.springframework.data.jpa.repository.Modifying;
 import org.springframework.data.jpa.repository.Query;
@@ -20,4 +22,10 @@ public interface PostRepository extends JpaRepository<PostEntity,Integer> {
     List<PostEntity> findAllByUserIdAndIsDeletedFalseOrderByCreatedAtDesc(int userId);
 
     int countByUserIdAndIsDeletedFalse(int userId);
+
+    /// 페이지네이션 전체조회
+    Page<PostEntity>  findAllByIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable);
+
+    /// 페이지네이션 카테고리별조회
+    Page<PostEntity> findAllByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(Pageable pageable, int categoryId);
 }
