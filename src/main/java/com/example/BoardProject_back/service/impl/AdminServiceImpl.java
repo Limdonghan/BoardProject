@@ -21,12 +21,20 @@ public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
 
     /**
-     * 신고 페이지네이션
+     * 신고 페이지네이션 - 전체
      */
     @Override
     public Page<ReportListDTO> getReportList(Pageable pageable) {
         Page<ReportEntity> reportPage = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return reportPage.map(report->new ReportListDTO(report));
+    }
 
+    /**
+     * 신고 페이지네이션 - 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getReportStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdOrderByCreatedAtDesc(pageable, statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
 
@@ -35,7 +43,7 @@ public class AdminServiceImpl implements AdminService {
      */
     @Override
     public Page<ReportListDTO> getPostAndStatusList(Pageable pageable, int statusId) {
-        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(pageable,statusId);
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(pageable, statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
 
@@ -43,10 +51,13 @@ public class AdminServiceImpl implements AdminService {
      * 신고 페이지네이션 - 댓글 및 신고상태별
      */
     @Override
-    public Page<ReportListDTO> getCommentAndStatusList(Pageable pageable,  int statusId) {
-        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(pageable,statusId);
+    public Page<ReportListDTO> getCommentAndStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(pageable, statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
+    /**
+     * 신고 페이지네이션 - 댓글 및 신고상태별
+     */
 
 
     /**
