@@ -8,6 +8,8 @@ import org.springframework.data.domain.Pageable;
 public interface AdminService {
 
     Page<ReportListDTO>  getReportList(Pageable pageable);
+    Page<ReportListDTO>  getPostAndStatusList(Pageable pageable, int statusId);
+    Page<ReportListDTO>  getCommentAndStatusList(Pageable pageable, int statusId);
 
     ReportDetailDTO getReportDetail(int reportId);
 }

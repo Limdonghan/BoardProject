@@ -55,4 +55,22 @@ public class AdminController {
         return ResponseEntity.ok(reportDetail);
 
     }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("post/{statusId}")
+    public ResponseEntity<Page<ReportListDTO>> getReportListPostAndStatusDTOResponseEntity(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PathVariable int statusId) {
+        Page<ReportListDTO> reportList = adminService.getPostAndStatusList(pageable, statusId);
+        return ResponseEntity.ok(reportList);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("comment/{statusId}")
+    public ResponseEntity<Page<ReportListDTO>> getReportListCommentAndStatusDTOResponseEntity(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PathVariable int statusId) {
+        Page<ReportListDTO> reportList = adminService.getCommentAndStatusList(pageable, statusId);
+        return ResponseEntity.ok(reportList);
+    }
 }
