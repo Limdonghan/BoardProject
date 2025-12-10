@@ -9,7 +9,11 @@ import java.util.List;
 
 public interface ReportRepository extends JpaRepository<ReportEntity,Integer> {
 
+    /// 페이지네이션 전체
     Page<ReportEntity> findAllByOrderByCreatedAtDesc(Pageable pageable);
+
+    /// 추가 - 페이지네이션 신고상태별
+    Page<ReportEntity> findAllByStatus_IdOrderByCreatedAtDesc(Pageable pageable, int statusId);
 
     /// 게시글 총 신고된 횟수
     int countByPostId(int postId);
@@ -29,7 +33,6 @@ public interface ReportRepository extends JpaRepository<ReportEntity,Integer> {
 
     /// 페이지네이션 게시글 및 신고상태별
     Page<ReportEntity> findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(Pageable pageable, int statusId);
-
 
     /// 페이지네이션 댓글 및 신고상태별
     Page<ReportEntity> findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(Pageable pageable, int statusId);
