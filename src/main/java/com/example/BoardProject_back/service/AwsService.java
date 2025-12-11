@@ -7,9 +7,13 @@ import org.springframework.stereotype.Service;
 import org.springframework.web.multipart.MultipartFile;
 import software.amazon.awssdk.core.sync.RequestBody;
 import software.amazon.awssdk.services.s3.S3Client;
-import software.amazon.awssdk.services.s3.model.PutObjectRequest;
+import software.amazon.awssdk.services.s3.model.*;
 
 import java.io.InputStream;
+import java.net.URI;
+import java.net.URL;
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 
 @Service
@@ -99,7 +103,53 @@ public class AwsService {
     /**
      * 파일 삭제
      */
-    public void deleteFile(String fileName) {
-        s3Client.deleteObject(builder -> builder.bucket(bucketName).key(fileName));
+    public void deleteFile(List<String> imageUrls) {
+
+        /// 리스트가 비어있으면 S3 요청을 보내지 않음
+        if (imageUrls == null || imageUrls.isEmpty()) {
+            return;
+        }
+
+        /// URL에서 Key 추출
+        List<String> keys = imageUrls.stream()
+                .map(s -> getKeyFromImageUrls(s))
+                .toList();
+        try {
+            /// 삭제 요청 객체 생성
+            DeleteObjectsRequest deleteObjectRequest = DeleteObjectsRequest.builder()
+                    .bucket(bucketName)
+                    .delete(builder -> builder.objects(
+                            keys.stream()
+                                    .map(s -> ObjectIdentifier.builder().key(s).build())
+                                    .toList()
+                    ))
+                    .build();
+
+            /// S3에 삭제 요청 전송
+            s3Client.deleteObjects(deleteObjectRequest);
+        }catch (Exception e){
+            log.error(e.getMessage());
+            throw new RuntimeException("파일 삭제중 오류가 발생했습니다.");
+        }
+    }
+
+    /**
+     * [핵심 로직] 이미지 URL에서 S3 객체 Key(파일명) 추출
+     * 예: https://버킷.s3.ap-northeast-2.../test/image.jpg -> test/image.jpg
+     */
+    private String getKeyFromImageUrls(String imageUrl) {
+        try {
+            /// 인코딩된 주소를 URI 객체로 변환 후 URL 객체로 변환
+            URL url = new URI(imageUrl).toURL();
+
+            /// URI에서 경로 부분을 가져와 URL 디코딩을 통해 실제 키로 변환 (중요! 한글/공백 디코딩)
+            String decodedKey = URLDecoder.decode(url.getPath(), StandardCharsets.UTF_8);
+
+            /// 경로 앞에 '/'가 있으므로 이를 제거한 뒤 반환 ( /test.jpg -> test.jpg )
+            return decodedKey.substring(1);
+        } catch (Exception exception) {
+            log.error(exception.getMessage(), exception);
+            throw new RuntimeException("허용되지 않은 포멧");
+        }
     }
 }
