@@ -163,6 +163,21 @@ public class PostServiceImpl implements PostService {
         /// typesense 삭제
         typesenseService.deletePost(id);
 
+        /// [추가] 게시글 삭제시 이미지파일들 찾아서 삭제
+        List<ImageEntity> allByPostId = imageRepository.findAllByPostId(id);
+
+        if (!allByPostId.isEmpty()) {
+            List<String> imageUrlList = allByPostId.stream()
+                    .map(ImageEntity::getUrl).toList();
+
+            /// S3에서 이미지 삭제
+            awsService.deleteFile(imageUrlList);
+
+            /// DB에서 해당 칼럼 삭제
+            imageRepository.deleteAll(allByPostId);
+        }
+
+
     }
 
     /**
