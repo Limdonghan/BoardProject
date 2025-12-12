@@ -3,6 +3,7 @@ package com.example.BoardProject_back.service.impl;
 import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.entity.*;
 import com.example.BoardProject_back.repository.*;
+import com.example.BoardProject_back.service.AwsService;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import com.example.BoardProject_back.service.TypesenseService;
@@ -12,6 +13,8 @@ import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.net.URLDecoder;
+import java.nio.charset.StandardCharsets;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -21,11 +24,13 @@ public class PostServiceImpl implements PostService {
     private final PostRepository postRepository;
     private final CategoryRepository categoryRepository;
     private final UserRepository userRepository;
+    private final ImageRepository imageRepository;
     private final PostReactionRepository postReactionRepository;
     private final GradeService gradeService;
     private final CommentRepository commentRepository;
     private final TypesenseService typesenseService;
 
+    private final AwsService awsService;
 
     /**
      * 게시글 작성
@@ -45,6 +50,22 @@ public class PostServiceImpl implements PostService {
                 .build();
         PostEntity savedPost = postRepository.save(build);
 
+        /// [추가] Image Table 저장
+        if (postDTO.getImageUrl() != null && !postDTO.getImageUrl().isEmpty()) {
+            for (String url : postDTO.getImageUrl()) {
+
+                /// URL에서 파일명만 추출
+                String originalFilename = extractFileNameFromUrl(url);
+
+                ImageEntity imageEntity = ImageEntity.builder()
+                        .post(build)
+                        .url(url)
+                        .originalName(originalFilename)
+                        .build();
+                imageRepository.save(imageEntity);
+            }
+        }
+
         UserEntity user = userRepository.findById(userEntity.getId())
                 .orElseThrow(() -> new IllegalArgumentException("게시글을 작성한 유저를 찾을 수 없음 ??"));
 
@@ -56,6 +77,20 @@ public class PostServiceImpl implements PostService {
 
         /// typesense 저장
         typesenseService.indexPost(savedPost);
+    }
+
+    /**
+     *  [추가] 파일명 추출 메서드
+     */
+    private String extractFileNameFromUrl(String url) {
+        try {
+            /// URL 인코딩
+            String fileName = URLDecoder.decode(url, StandardCharsets.UTF_8);
+            /// 마지막 '/'뒤의 문자열만 자르기
+            return fileName.substring(fileName.lastIndexOf('_') + 1);
+        }catch (Exception e) {
+            return url;
+        }
     }
 
     /**

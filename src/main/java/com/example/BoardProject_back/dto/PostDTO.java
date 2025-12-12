@@ -20,4 +20,6 @@ public class PostDTO {
 
     @NotNull
     private String context;
+
+    private List<String> imageUrl;
 }
