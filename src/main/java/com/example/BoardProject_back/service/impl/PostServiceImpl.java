@@ -7,6 +7,7 @@ import com.example.BoardProject_back.service.AwsService;
 import com.example.BoardProject_back.service.GradeService;
 import com.example.BoardProject_back.service.PostService;
 import com.example.BoardProject_back.service.TypesenseService;
+import jakarta.validation.constraints.NotNull;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -275,21 +276,46 @@ public class PostServiceImpl implements PostService {
 
     /**
      * Pageable 전체
+     * [수정] 페이지네이션시 이미지도 같이 요청하도록
      */
     @Override
+    @Transactional(readOnly = true) /// 읽기 전용 트랜잭션
     public Page<PostListPageDTO> getBoardList(Pageable pageable) {
+        /// 게시글 페이지 가져오기
         Page<PostEntity> postPage = postRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc(pageable);
-        return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
+
+        /// [수정]게시글(PostEntity)을 하나씩 DTO로 변환하면서, 이미지도 같이 찾아서 넣어줌
+        return getPostListPageDTOS(postPage);
     }
 
 
     /**
-     * Pageable 카테고리별
+     * Pageable 카테고리별 구분
      */
     @Override
+    @Transactional(readOnly = true) /// 읽기 전용 트랜잭션
     public Page<PostListPageDTO> getCategoryBoardList(Pageable pageable, int categoryId) {
+        /// 게시글 페이지 가져오기
         Page<PostEntity> postPage = postRepository.findAllByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(pageable, categoryId);
-        return postPage.map(PostListPageDTO -> new PostListPageDTO(PostListPageDTO));
+
+        /// [수정]게시글(PostEntity)을 하나씩 DTO로 변환하면서, 이미지도 같이 찾아서 넣어줌
+        return getPostListPageDTOS(postPage);
+    }
+
+    @NotNull
+    private Page<PostListPageDTO> getPostListPageDTOS(Page<PostEntity> postPage) {
+        return postPage.map(postEntity ->  {
+            /// 현재 게시글 ID로 이미지 리스트 조회
+            List<ImageEntity> allByPostId = imageRepository.findAllByPostId(postEntity.getId());
+
+            /// 첫 번째 이미지가 있으면 가져오고, 없으면 null
+            ImageEntity thumbnailImage = null;
+            if (!allByPostId.isEmpty()) {
+                thumbnailImage = allByPostId.get(0);
+            }
+            /// DTO 생성 (게시글 + 썸네일이미지)
+            return new PostListPageDTO(postEntity, thumbnailImage);
+        });
     }
 
 }
