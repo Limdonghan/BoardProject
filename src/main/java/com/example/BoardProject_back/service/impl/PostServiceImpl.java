@@ -107,7 +107,7 @@ public class PostServiceImpl implements PostService {
         PostEntity postEntity = postRepository.findByIdAndIsDeletedFalse(id)
                 .orElseThrow(() -> new IllegalArgumentException("해당 개시글이 존재하지 않거나 삭제된 게시글 입니다!!"));
 
-        /// 게시글에 해당되는 이미지 찾기
+        /// [추가]게시글에 해당되는 이미지 찾기
         List<ImageEntity> list = imageRepository.findAllByPostId(id);
         List<String> imageUrlList = list.stream()
                 .map(imageEntity -> imageEntity.getUrl())
