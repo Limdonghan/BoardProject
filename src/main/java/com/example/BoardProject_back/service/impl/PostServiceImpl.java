@@ -138,6 +138,9 @@ public class PostServiceImpl implements PostService {
     public void postUpdate(int id, PostUpdateDTO postUpdateDTO, UserEntity userEntity) {
         PostEntity post = postCheck(id, userEntity);
 
+        /// [추가] 기존에 있는 이미지 리스트 저장
+        List<ImageEntity> currentImagesList = imageRepository.findAllByPostId(id);
+
         CategoryEntity categoryEntity = categoryRepository.findById(postUpdateDTO.getCategory())
                 .orElseThrow(() -> new IllegalArgumentException("일치하는 카테고리가 없음!"));
 
@@ -147,8 +150,54 @@ public class PostServiceImpl implements PostService {
                 categoryEntity
         );
 
+        /**
+         * [추가] 이미지 업데이트 처리 과정
+         */
+
+        /// 게시글 수정 후 DB에 저장된 이미지
+        List<String> newImgeslist = postUpdateDTO.getImageUrl();
+
+        /// 이미지 삭제 대상 찾기
+        List<ImageEntity> imagesToDelete = currentImagesList.stream()
+                .filter(imageEntity -> !newImgeslist.contains(imageEntity.getUrl()))
+                .toList();
+
+        /// 삭제 대상이 있다면
+        if (!imagesToDelete.isEmpty()) {
+            List<String> deleteImages = imagesToDelete.stream()
+                    .map(ImageEntity::getUrl)
+                    .toList();
+
+            /// S3 삭제
+            awsService.deleteFile(deleteImages);
+
+            /// DB 삭제
+            imageRepository.deleteAll(imagesToDelete);
+        }
+
+        /// 새로 추가된 이미지가 있다면 DB에 저장
+        for (String url : newImgeslist) {
+
+            /// 이미지 테이블에 없고 newImageUrls에는 있는 것을 찾아서 save
+            boolean exists = currentImagesList.stream()
+                    .anyMatch(img -> img.getUrl().equals(url));
+
+            if (!exists) {
+                /// URL 파일명 추출
+                String originalFilename = extractFileNameFromUrl(url);
+                ImageEntity imageEntity = ImageEntity.builder()
+                        .post(post)
+                        .url(url)
+                        .originalName(originalFilename)
+                        .build();
+                imageRepository.save(imageEntity);
+            }
+
+        }
+
         /// typesense 저장
         typesenseService.indexPost(post);
+
     }
 
     /**
@@ -159,9 +208,6 @@ public class PostServiceImpl implements PostService {
     public void postDelete(int id, UserEntity userEntity) {
         PostEntity post = postCheck(id, userEntity);
         post.postDelete();
-
-        /// typesense 삭제
-        typesenseService.deletePost(id);
 
         /// [추가] 게시글 삭제시 이미지파일들 찾아서 삭제
         List<ImageEntity> allByPostId = imageRepository.findAllByPostId(id);
@@ -177,6 +223,8 @@ public class PostServiceImpl implements PostService {
             imageRepository.deleteAll(allByPostId);
         }
 
+        /// typesense 삭제
+        typesenseService.deletePost(id);
 
     }
 
