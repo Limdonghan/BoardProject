@@ -49,4 +49,15 @@ public class AccountSettingServiceImpl implements AccountSettingService {
         user.userUpdatePassword(newEncodePassword);
         userRepository.save(user);
     }
+
+    /**
+     * 닉네임 중복체크
+     */
+    @Override
+    public boolean isNicknameDuplicate(String nickname) {
+        return userRepository.existsByNickName(nickname);
+    }
+
+
+
 }
