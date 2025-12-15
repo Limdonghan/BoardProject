@@ -5,6 +5,7 @@ import lombok.Builder;
 import lombok.Getter;
 
 import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Builder
@@ -33,4 +34,6 @@ public class PostInfoDTO {
 
     @NotNull
     private LocalDateTime date;
+
+    private List<String> imageUrl;
 }

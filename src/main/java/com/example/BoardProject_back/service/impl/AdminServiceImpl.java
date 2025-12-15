@@ -4,8 +4,10 @@ import com.example.BoardProject_back.dto.PostInfoDTO;
 import com.example.BoardProject_back.dto.ReportDetailDTO;
 import com.example.BoardProject_back.dto.ReportListDTO;
 import com.example.BoardProject_back.dto.ReportStatusSummaryDTO;
+import com.example.BoardProject_back.entity.ImageEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.ReportEntity;
+import com.example.BoardProject_back.repository.ImageRepository;
 import com.example.BoardProject_back.repository.ReportRepository;
 import com.example.BoardProject_back.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -19,6 +21,7 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
+    private final ImageRepository imageRepository;
 
     /**
      * 신고 페이지네이션 - 전체
@@ -101,6 +104,11 @@ public class AdminServiceImpl implements AdminService {
                 .distinct()
                 .toList();
 
+        List<ImageEntity> allByPostId = imageRepository.findAllByPostId(postEntity.getId());
+        List<String> imgUrlList = allByPostId.stream()
+                .map(ImageEntity::getUrl)
+                .toList();
+
         /// DTO 매핑
         return ReportDetailDTO.builder()
                 .reportId(reportEntity.getId())
@@ -115,6 +123,7 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getPost().getLikeCount())
                         .disLikeCount(reportEntity.getPost().getDisLikeCount())
                         .date(reportEntity.getPost().getCreatedAt())
+                        .imageUrl(imgUrlList)
                         .build()
                         : PostInfoDTO.builder()
                         .user(reportEntity.getComment().getUser().getNickName())
@@ -124,6 +133,7 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getComment().getPost().getLikeCount())
                         .disLikeCount(reportEntity.getComment().getPost().getDisLikeCount())
                         .date(reportEntity.getComment().getPost().getCreatedAt())
+                        .imageUrl(imgUrlList)
                         .build())
                 .summary(ReportStatusSummaryDTO.builder()
                         .reporters(reporters)
