@@ -1,11 +1,13 @@
 package com.example.BoardProject_back.service;
 
 import com.example.BoardProject_back.dto.PostSearchResultDTO;
+import com.example.BoardProject_back.entity.ImageEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import jakarta.annotation.PostConstruct;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 import org.typesense.api.Client;
 import org.typesense.api.FieldTypes;
 import org.typesense.api.exceptions.ObjectNotFound;
@@ -73,6 +75,7 @@ public class TypesenseService {
             document.put("content", post.getContext());
             document.put("author", post.getUser().getNickName());
             document.put("category", post.getCategory().getCategory());
+            document.put("viewCount",post.getPostView());
             document.put("totalComments", post.getCommentCount());
             document.put("totalLikes", post.getLikeCount()- post.getDisLikeCount());
             document.put("created_at",
@@ -80,7 +83,20 @@ public class TypesenseService {
                             ? post.getCreatedAt().toEpochSecond(ZoneOffset.UTC)
                             : System.currentTimeMillis() / 1000);       /// 검색 시 별도 정렬 조건 없으면 최신순으로 정렬하도록 기본 설정
 
-        /// 게시글을 작성하거나 수정했을 때, 해당 내용을 Typesense에 동기화 upsert(save + update)
+            /// [추가] imageURL List 추가
+            List<String> imageUrls = new ArrayList<>();
+
+            /// post.getImages()는 ImageEntity들의 리스트라고 가정
+            if (post.getImages() != null && !post.getImages().isEmpty()) {
+                imageUrls = post.getImages().stream()
+                        .map(ImageEntity::getUrl) /// ★ 실제 이미지 경로 getter (예: getFilePath, getUrl 등)
+                        .toList();
+            }
+
+            /// 추출한 문자열 리스트를 문서에 넣기
+            document.put("imageUrls", imageUrls);
+
+            /// 게시글을 작성하거나 수정했을 때, 해당 내용을 Typesense에 동기화 upsert(save + update)
             client.collections(COLLECTION_NAME).documents().upsert(document);
         } catch (Exception e) {
             log.warn("Failed to index post {} into Typesense", post.getId(), e);
@@ -130,6 +146,7 @@ public class TypesenseService {
                 String category = document.getOrDefault("category", "").toString();
 
                 /// 숫자형 필드 안전하게 가져오기
+                int viewCount = document.get("viewCount") != null ? ((Number) document.get("viewCount")).intValue():0;
                 int totalComments = document.get("totalComments") != null ? ((Number) document.get("totalComments")).intValue() : 0;
                 int totalLikes = document.get("totalLikes") != null ? ((Number) document.get("totalLikes")).intValue() : 0;
 
@@ -137,8 +154,15 @@ public class TypesenseService {
                 long createdAtEpoch = document.get("created_at") != null ? ((Number) document.get("created_at")).longValue() : 0L;
                 LocalDateTime createdAt = LocalDateTime.ofEpochSecond(createdAtEpoch, 0, ZoneOffset.UTC);
 
+                /// Image 가져오기
+                List<String> imageUrl = new ArrayList<>();
+                if (document.get("imageUrls") != null) {
+                    /// Typesense 응답은 List 형태이므로 캐스팅
+                    imageUrl = (List<String>) document.get("imageUrls");
+                }
+
                 results.add(new PostSearchResultDTO(
-                        postId, title, content, author, category, totalComments, totalLikes, createdAt
+                        postId, title, content, author, category, viewCount, totalComments, totalLikes, createdAt, imageUrl
                 ));
             }
         } catch (Exception e) {
@@ -169,15 +193,17 @@ public class TypesenseService {
 
         /// Schema 정의
         List<Field> fields = new ArrayList<>();
-        fields.add(new Field().name("id").type(FieldTypes.STRING));                         /// Typesense 내부 고유 ID
-        fields.add(new Field().name("post_id").type(FieldTypes.INT32));                     /// 실제 DB의 PK
-        fields.add(new Field().name("title").type(FieldTypes.STRING));                      /// 검색 대상 '게시글 제목'
-        fields.add(new Field().name("content").type(FieldTypes.STRING).optional(true));     /// 검색 대상 '게시글 본문'
-        fields.add(new Field().name("author").type(FieldTypes.STRING).optional(true));      /// 검색 대상 or 필터링 '게시글 작성자'
-        fields.add(new Field().name("category").type(FieldTypes.STRING).optional(true));    /// 검색 대상 or 필터링 '카테고리'
-        fields.add(new Field().name("totalComments").type(FieldTypes.INT32).optional(true));/// 검색 조회 '총 댓글 수'
-        fields.add(new Field().name("totalLikes").type(FieldTypes.INT32).optional(true));   /// 검색 조회 '총 좋아요 수'
-        fields.add(new Field().name("created_at").type(FieldTypes.INT64));                  /// 정렬 '생성일자'
+        fields.add(new Field().name("id").type(FieldTypes.STRING));                             /// Typesense 내부 고유 ID
+        fields.add(new Field().name("post_id").type(FieldTypes.INT32));                         /// 실제 DB의 PK
+        fields.add(new Field().name("title").type(FieldTypes.STRING));                          /// 검색 대상 '게시글 제목'
+        fields.add(new Field().name("content").type(FieldTypes.STRING).optional(true));         /// 검색 대상 '게시글 본문'
+        fields.add(new Field().name("author").type(FieldTypes.STRING).optional(true));          /// 검색 대상 or 필터링 '게시글 작성자'
+        fields.add(new Field().name("category").type(FieldTypes.STRING).optional(true));        /// 검색 대상 or 필터링 '카테고리'
+        fields.add(new Field().name("viewCount").type(FieldTypes.INT32).optional(true));        /// 게시글 조회수
+        fields.add(new Field().name("totalComments").type(FieldTypes.INT32).optional(true));    /// 검색 조회 '총 댓글 수'
+        fields.add(new Field().name("totalLikes").type(FieldTypes.INT32).optional(true));       /// 검색 조회 '총 좋아요 수'
+        fields.add(new Field().name("created_at").type(FieldTypes.INT64));                      /// 정렬 '생성일자'
+        fields.add(new Field().name("imageURL").type(FieldTypes.STRING_ARRAY).optional(true));  /// [추가] ImageURL 저장 List<String>
 
         collectionSchema.fields(fields);
         collectionSchema.defaultSortingField("created_at");
@@ -187,11 +213,12 @@ public class TypesenseService {
     }
 
     /// 게시글 리스트를 받아서 싹 다 넣는 메서드
+    @Transactional(readOnly = true)
     public void indexAllPosts(List<PostEntity> posts) {
         try {
             /**
              * [수정] 동기화 버튼을 눌렀을때, 컬렉션이 없으면 에러가 나므로
-             * 루프 돌기 전에 "컬렉션이 존재하는지"체크합니다.
+             * 루프 돌기 전에 "컬렉션이 존재하는지"체크
              */
             ensureCollectionExists();
         }catch (Exception e) {
