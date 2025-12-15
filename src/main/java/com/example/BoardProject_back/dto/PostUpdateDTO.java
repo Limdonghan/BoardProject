@@ -4,6 +4,8 @@ import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
 import lombok.NoArgsConstructor;
 
+import java.util.List;
+
 @Getter
 @NoArgsConstructor
 public class PostUpdateDTO {
@@ -15,5 +17,7 @@ public class PostUpdateDTO {
 
     @NotNull
     private String context;
+
+    private List<String> imageUrl;
 
 }

@@ -39,6 +39,7 @@ public class AdminController {
 
         return "동기화 완료! 총 " + allPosts.size() + "개의 글이 인덱싱되었습니다.";
     }
+
     @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("")
     public ResponseEntity<Page<ReportListDTO>> getReportList(
@@ -49,10 +50,38 @@ public class AdminController {
     }
 
     @PreAuthorize("hasRole('ADMIN')")
-    @GetMapping("/{reportId}")
+    @GetMapping("{statusId}")
+    public ResponseEntity<Page<ReportListDTO>> getReportStatusList(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PathVariable int statusId) {
+        Page<ReportListDTO> reportList = adminService.getReportStatusList(pageable, statusId);
+
+        return ResponseEntity.ok(reportList);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("detail/{reportId}")
     public ResponseEntity<ReportDetailDTO> getReportDetailDTOResponseEntity(@PathVariable int reportId) {
         ReportDetailDTO reportDetail = adminService.getReportDetail(reportId);
         return ResponseEntity.ok(reportDetail);
 
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("post/{statusId}")
+    public ResponseEntity<Page<ReportListDTO>> getReportListPostAndStatusDTOResponseEntity(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PathVariable int statusId) {
+        Page<ReportListDTO> reportList = adminService.getPostAndStatusList(pageable, statusId);
+        return ResponseEntity.ok(reportList);
+    }
+
+    @PreAuthorize("hasRole('ADMIN')")
+    @GetMapping("comment/{statusId}")
+    public ResponseEntity<Page<ReportListDTO>> getReportListCommentAndStatusDTOResponseEntity(
+            @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable,
+            @PathVariable int statusId) {
+        Page<ReportListDTO> reportList = adminService.getCommentAndStatusList(pageable, statusId);
+        return ResponseEntity.ok(reportList);
     }
 }

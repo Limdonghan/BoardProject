@@ -1,11 +1,10 @@
 package com.example.BoardProject_back.service.impl;
 
-import com.example.BoardProject_back.dto.PostInfoDTO;
-import com.example.BoardProject_back.dto.ReportDetailDTO;
-import com.example.BoardProject_back.dto.ReportListDTO;
-import com.example.BoardProject_back.dto.ReportStatusSummaryDTO;
+import com.example.BoardProject_back.dto.*;
+import com.example.BoardProject_back.entity.ImageEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.ReportEntity;
+import com.example.BoardProject_back.repository.ImageRepository;
 import com.example.BoardProject_back.repository.ReportRepository;
 import com.example.BoardProject_back.service.AdminService;
 import lombok.RequiredArgsConstructor;
@@ -19,16 +18,47 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
+    private final ImageRepository imageRepository;
 
     /**
-     * 신고 페이지네이션
+     * 신고 페이지네이션 - 전체
      */
     @Override
     public Page<ReportListDTO> getReportList(Pageable pageable) {
         Page<ReportEntity> reportPage = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
+        return reportPage.map(report->new ReportListDTO(report));
+    }
 
+    /**
+     * 신고 페이지네이션 - 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getReportStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdOrderByCreatedAtDesc(pageable, statusId);
         return reportPage.map(report -> new ReportListDTO(report));
     }
+
+    /**
+     * 신고 페이지네이션 - 게시글 및 신고상태별 댓글 및 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getPostAndStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndPostIsNotNullOrderByCreatedAtDesc(pageable, statusId);
+        return reportPage.map(report -> new ReportListDTO(report));
+    }
+
+    /**
+     * 신고 페이지네이션 - 댓글 및 신고상태별
+     */
+    @Override
+    public Page<ReportListDTO> getCommentAndStatusList(Pageable pageable, int statusId) {
+        Page<ReportEntity> reportPage = reportRepository.findAllByStatus_IdAndCommentIsNotNullOrderByCreatedAtDesc(pageable, statusId);
+        return reportPage.map(report -> new ReportListDTO(report));
+    }
+    /**
+     * 신고 페이지네이션 - 댓글 및 신고상태별
+     */
+
 
     /**
      * 신고 상세 페이지
@@ -71,13 +101,18 @@ public class AdminServiceImpl implements AdminService {
                 .distinct()
                 .toList();
 
+        List<ImageEntity> allByPostId = imageRepository.findAllByPostId(postEntity.getId());
+        List<String> imgUrlList = allByPostId.stream()
+                .map(ImageEntity::getUrl)
+                .toList();
+
         /// DTO 매핑
         return ReportDetailDTO.builder()
                 .reportId(reportEntity.getId())
                 .comment(reportEntity.getComment() != null ? reportEntity.getComment().getComment() : "")
                 .reported(reportEntity.getReported().getNickName())
                 .postInfo(reportEntity.getPost() != null
-                        ? PostInfoDTO.builder()
+                        ? AdminPostInfoDTO.builder()
                         .user(reportEntity.getReported().getNickName())
                         .title(reportEntity.getPost().getTitle())
                         .category(reportEntity.getPost().getCategory().getCategory())
@@ -85,8 +120,10 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getPost().getLikeCount())
                         .disLikeCount(reportEntity.getPost().getDisLikeCount())
                         .date(reportEntity.getPost().getCreatedAt())
+                        .isDeleted(reportEntity.getPost().isDeleted())
+                        .imageUrl(imgUrlList)
                         .build()
-                        : PostInfoDTO.builder()
+                        : AdminPostInfoDTO.builder()
                         .user(reportEntity.getComment().getUser().getNickName())
                         .title(reportEntity.getComment().getPost().getTitle())
                         .category(reportEntity.getComment().getPost().getCategory().getCategory())
@@ -94,6 +131,8 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getComment().getPost().getLikeCount())
                         .disLikeCount(reportEntity.getComment().getPost().getDisLikeCount())
                         .date(reportEntity.getComment().getPost().getCreatedAt())
+                        .isDeleted(reportEntity.getComment().isDeleted())
+                        .imageUrl(imgUrlList)
                         .build())
                 .summary(ReportStatusSummaryDTO.builder()
                         .reporters(reporters)

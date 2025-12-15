@@ -19,7 +19,8 @@ bin/
 
 ### Config files ###
 src/main/resources/application.properties
-src/main/resources/docker-compost.yml
+src/main/resources/application-prod.properties
+src/main/resources/docker-compose.yml
 
 ### IntelliJ IDEA ###
 .idea

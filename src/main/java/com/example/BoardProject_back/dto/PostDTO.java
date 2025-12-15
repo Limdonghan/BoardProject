@@ -2,13 +2,11 @@ package com.example.BoardProject_back.dto;
 
 import jakarta.validation.constraints.NotNull;
 import lombok.*;
-import org.springframework.stereotype.Service;
 
-import java.time.LocalDateTime;
+import java.util.List;
 
 @Getter
 @Setter
-@Service
 @AllArgsConstructor
 @NoArgsConstructor
 @Builder
@@ -22,4 +20,6 @@ public class PostDTO {
 
     @NotNull
     private String context;
+
+    private List<String> imageUrl;
 }
