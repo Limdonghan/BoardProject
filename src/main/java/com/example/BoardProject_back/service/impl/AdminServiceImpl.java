@@ -1,9 +1,6 @@
 package com.example.BoardProject_back.service.impl;
 
-import com.example.BoardProject_back.dto.PostInfoDTO;
-import com.example.BoardProject_back.dto.ReportDetailDTO;
-import com.example.BoardProject_back.dto.ReportListDTO;
-import com.example.BoardProject_back.dto.ReportStatusSummaryDTO;
+import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.entity.ImageEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.ReportEntity;
@@ -115,7 +112,7 @@ public class AdminServiceImpl implements AdminService {
                 .comment(reportEntity.getComment() != null ? reportEntity.getComment().getComment() : "")
                 .reported(reportEntity.getReported().getNickName())
                 .postInfo(reportEntity.getPost() != null
-                        ? PostInfoDTO.builder()
+                        ? AdminPostInfoDTO.builder()
                         .user(reportEntity.getReported().getNickName())
                         .title(reportEntity.getPost().getTitle())
                         .category(reportEntity.getPost().getCategory().getCategory())
@@ -123,9 +120,10 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getPost().getLikeCount())
                         .disLikeCount(reportEntity.getPost().getDisLikeCount())
                         .date(reportEntity.getPost().getCreatedAt())
+                        .isDeleted(reportEntity.getPost().isDeleted())
                         .imageUrl(imgUrlList)
                         .build()
-                        : PostInfoDTO.builder()
+                        : AdminPostInfoDTO.builder()
                         .user(reportEntity.getComment().getUser().getNickName())
                         .title(reportEntity.getComment().getPost().getTitle())
                         .category(reportEntity.getComment().getPost().getCategory().getCategory())
@@ -133,6 +131,7 @@ public class AdminServiceImpl implements AdminService {
                         .likeCount(reportEntity.getComment().getPost().getLikeCount())
                         .disLikeCount(reportEntity.getComment().getPost().getDisLikeCount())
                         .date(reportEntity.getComment().getPost().getCreatedAt())
+                        .isDeleted(reportEntity.getComment().isDeleted())
                         .imageUrl(imgUrlList)
                         .build())
                 .summary(ReportStatusSummaryDTO.builder()
