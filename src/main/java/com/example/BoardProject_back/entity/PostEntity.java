@@ -4,9 +4,12 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.ColumnDefault;
 import org.hibernate.annotations.CreationTimestamp;
+import org.hibernate.annotations.Formula;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Posts")
@@ -83,5 +86,12 @@ public class PostEntity {
     public void disLikeHandle(int disLikeCount){
         this.disLikeCount += 1;
     }
+
+    @Formula("(SELECT count(1) FROM comments c WHERE c.post_id = id AND c.is_deleted = FALSE)")
+    private int commentCount;
+
+    /// [추가] "ImageEntity의 'post' 필드가 나를 참조하고 있으니, 걔네들을 리스트로 묶어줘"
+    @OneToMany(mappedBy = "post",  fetch = FetchType.LAZY, cascade = CascadeType.ALL)
+    private List<ImageEntity> images = new ArrayList<>();
 
 }
