@@ -68,7 +68,8 @@ public class CommentServiceImpl implements CommentService {
     public List<CommentRespDTO> getComments(int postId, UserEntity userEntity) {
 
         List<CommentEntity> commentList = commentRepository.findAllByPostIdOrderByCreatedAtDesc(postId);
-        List<CommentRespDTO> collect = commentList.stream().map(comment -> {
+
+        return commentList.stream().map(comment -> {
             boolean isOwner = false;  /// 댓글 본인 확인 true = 본인
             if (userEntity!=null && ((userEntity.getId())==(comment.getUser().getId()))) {
                 isOwner = true;
@@ -81,8 +82,6 @@ public class CommentServiceImpl implements CommentService {
                     .isOwner(isOwner)
                     .build();
         }).collect(Collectors.toList());
-
-        return collect;
     }
 
     /**
