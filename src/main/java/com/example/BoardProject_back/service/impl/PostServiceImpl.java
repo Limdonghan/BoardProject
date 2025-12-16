@@ -81,7 +81,7 @@ public class PostServiceImpl implements PostService {
     }
 
     /**
-     *  [추가] 파일명 추출 메서드
+     * [추가] 파일명 추출 메서드
      */
     private String extractFileNameFromUrl(String url) {
         try {
@@ -89,7 +89,7 @@ public class PostServiceImpl implements PostService {
             String fileName = URLDecoder.decode(url, StandardCharsets.UTF_8);
             /// 마지막 '/'뒤의 문자열만 자르기
             return fileName.substring(fileName.lastIndexOf('_') + 1);
-        }catch (Exception e) {
+        } catch (Exception e) {
             return url;
         }
     }
@@ -123,7 +123,7 @@ public class PostServiceImpl implements PostService {
                 .category(category)
                 .context(postEntity.getContext())
                 .postView(postEntity.getPostView())
-                .likeCount(postEntity.getLikeCount()-postEntity.getDisLikeCount())
+                .likeCount(postEntity.getLikeCount() - postEntity.getDisLikeCount())
                 .disLikeCount(postEntity.getDisLikeCount())
                 .imageUrl(imageUrlList)
                 .date(postEntity.getCreatedAt())
@@ -258,7 +258,7 @@ public class PostServiceImpl implements PostService {
         UserEntity author = postEntity.getUser();
 
         /// 중복 반응 체크 (이미 좋아요 또는 싫어요가 눌렸는치 체크)
-        if(postReactionRepository.existsByUserAndPost(userEntity, postEntity)){
+        if (postReactionRepository.existsByUserAndPost(userEntity, postEntity)) {
             throw new IllegalStateException("이미 반응을 남겼습니다!");
         }
 
@@ -294,7 +294,7 @@ public class PostServiceImpl implements PostService {
             if (author.getPoint() < 0) {
                 author.setPoint(0);
             }
-        } else{
+        } else {
             throw new IllegalArgumentException("잘못된 처리 방식 입니다");
         }
 
@@ -302,7 +302,6 @@ public class PostServiceImpl implements PostService {
         gradeService.gradeAssessment(author);
 
     }
-
 
 
     /**
@@ -319,16 +318,25 @@ public class PostServiceImpl implements PostService {
 
         /// DTO 매핑
         List<MyPostDTO> postDTOS = myPost.stream().map(
-                        postEntity -> MyPostDTO.builder()
-                                .id(postEntity.getId())
-                                .authorName(postEntity.getUser().getNickName())
-                                .title(postEntity.getTitle())
-                                .category(postEntity.getCategory().getCategory())
-                                .viewCount(postEntity.getPostView())
-                                .likeCount(postEntity.getLikeCount()-postEntity.getDisLikeCount())
-                                .createDate(postEntity.getCreatedAt())
-                                .commentCount(commentRepository.countByPostIdAndIsDeletedFalse(postEntity.getId()))
-                                .build())
+                        postEntity -> {
+                            List<ImageEntity> images = imageRepository.findAllByPostId(postEntity.getId());
+
+                            String thumbnailUrl = null;
+                            if (!images.isEmpty()) {
+                                thumbnailUrl = images.get(0).getUrl();
+                            }
+                            return MyPostDTO.builder()
+                                    .id(postEntity.getId())
+                                    .authorName(postEntity.getUser().getNickName())
+                                    .title(postEntity.getTitle())
+                                    .category(postEntity.getCategory().getCategory())
+                                    .viewCount(postEntity.getPostView())
+                                    .likeCount(postEntity.getLikeCount() - postEntity.getDisLikeCount())
+                                    .createDate(postEntity.getCreatedAt())
+                                    .thumbnailUrl(thumbnailUrl)
+                                    .commentCount(commentRepository.countByPostIdAndIsDeletedFalse(postEntity.getId()))
+                                    .build();
+                        })
                 .collect(Collectors.toList());
 
         return MyPostListDTO.builder()
@@ -342,7 +350,8 @@ public class PostServiceImpl implements PostService {
      * [수정] 페이지네이션시 이미지도 같이 요청하도록
      */
     @Override
-    @Transactional(readOnly = true) /// 읽기 전용 트랜잭션
+    @Transactional(readOnly = true)
+    /// 읽기 전용 트랜잭션
     public Page<PostListPageDTO> getBoardList(Pageable pageable) {
         /// 게시글 페이지 가져오기
         Page<PostEntity> postPage = postRepository.findAllByIsDeletedFalseOrderByCreatedAtDesc(pageable);
@@ -356,7 +365,8 @@ public class PostServiceImpl implements PostService {
      * Pageable 카테고리별 구분
      */
     @Override
-    @Transactional(readOnly = true) /// 읽기 전용 트랜잭션
+    @Transactional(readOnly = true)
+    /// 읽기 전용 트랜잭션
     public Page<PostListPageDTO> getCategoryBoardList(Pageable pageable, int categoryId) {
         /// 게시글 페이지 가져오기
         Page<PostEntity> postPage = postRepository.findAllByCategoryIdAndIsDeletedFalseOrderByCreatedAtDesc(pageable, categoryId);
@@ -367,7 +377,7 @@ public class PostServiceImpl implements PostService {
 
     @NotNull
     private Page<PostListPageDTO> getPostListPageDTOS(Page<PostEntity> postPage) {
-        return postPage.map(postEntity ->  {
+        return postPage.map(postEntity -> {
             /// 현재 게시글 ID로 이미지 리스트 조회
             List<ImageEntity> allByPostId = imageRepository.findAllByPostId(postEntity.getId());
 
