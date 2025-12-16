@@ -7,6 +7,8 @@ import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
 
 import java.time.LocalDateTime;
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "Comments")
@@ -46,6 +48,21 @@ public class CommentEntity {
     private LocalDateTime updatedAt;  //  댓글 수정날짜
 
     private LocalDateTime deletedAt;  //  댓글 삭제날짜
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "parent_id")
+    private CommentEntity parentComment;    /// [추가] 대댓글 기능 : 부모 댓글
+
+    @OneToMany(mappedBy = "parentComment",  fetch = FetchType.LAZY, orphanRemoval = true)
+    private List<CommentEntity> childrenComment = new ArrayList<>();    /// [추가] 대댓글 기능 : 자식 댓글
+
+    /// [추가] 댓글 그룹 (최상위 부모 댓글의 ID를 가짐)
+    @Column(name = "group_id")
+    private int groupId;
+
+    /// [추가] 댓글 깊이 (0: 원댓글, 1: 대댓글, 2: 대대댓글 ...)
+    private int depth;
+
 
     ///  댓글 수정
     public void commentUpdate(String comment) {
