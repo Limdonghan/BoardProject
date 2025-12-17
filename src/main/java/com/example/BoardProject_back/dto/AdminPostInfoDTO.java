@@ -9,8 +9,7 @@ import java.util.List;
 
 @Getter
 @Builder
-public class PostInfoDTO {
-
+public class AdminPostInfoDTO {
     @NotNull
     private String user; /// 게시글 작성자
 
@@ -34,6 +33,9 @@ public class PostInfoDTO {
 
     @NotNull
     private LocalDateTime date;
+
+    @NotNull
+    private boolean isDeleted;
 
     private List<String> imageUrl;
 }

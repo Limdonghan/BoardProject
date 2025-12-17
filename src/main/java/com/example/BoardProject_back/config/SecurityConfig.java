@@ -39,6 +39,7 @@ public class SecurityConfig {
                                         .requestMatchers(HttpMethod.GET,"/api/post/{id}").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/post/{postId}/comment").permitAll()
                                         .requestMatchers("/api/admin/sync-typesense").permitAll()
+                                        .requestMatchers("/api/file/**").permitAll()
                                         .anyRequest().authenticated()
                 )  /// 그 외의 요청은 인증된 사용자만 접근
                 .csrf(csrf -> csrf.disable())  /// JWT 사용 시 CSRF 보호 비활성화

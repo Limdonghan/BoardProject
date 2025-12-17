@@ -24,7 +24,10 @@ public class PostController {
     private final TypesenseService typesenseService;
 
     @PostMapping()
-    public ResponseEntity postCreation(@Validated @RequestBody PostDTO postDTO, @AuthenticationPrincipal CustomUserDetails customUserDetails) {
+    public ResponseEntity postCreation(
+            @Validated @RequestBody PostDTO postDTO,
+            @AuthenticationPrincipal CustomUserDetails customUserDetails
+            ) {
         postService.postCreation(postDTO, customUserDetails.getUserEntity());
         return ResponseEntity.ok("글 작성 완료");
     }
