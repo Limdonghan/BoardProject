@@ -4,6 +4,7 @@ import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.PostService;
 import com.example.BoardProject_back.service.TypesenseService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
@@ -24,6 +25,7 @@ public class PostController {
     private final TypesenseService typesenseService;
 
     @PostMapping()
+    @Operation(summary = "게시글 작성", description = "게시글 작성 API")
     public ResponseEntity postCreation(
             @Validated @RequestBody PostDTO postDTO,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
@@ -33,11 +35,13 @@ public class PostController {
     }
 
     @GetMapping("/{id}")
+    @Operation(summary = "게시글 조회", description = "게시글 조회 API (비로그인 가능)")
     public ResponseEntity<PostInfoDTO> postInfo(@PathVariable int id) {
         return ResponseEntity.ok(postService.getPostInfo(id));
     }
 
     @PatchMapping("/{id}")
+    @Operation(summary = "게시글 수정", description = "본인 게시글 수정 API")
     public ResponseEntity postUpdate(
             @PathVariable int id,
             @Validated @RequestBody PostUpdateDTO postUpdateDTO,
@@ -47,6 +51,7 @@ public class PostController {
     }
 
     @DeleteMapping("/{id}")
+    @Operation(summary = "게시글 삭제", description = "본인 게시글 삭제 API")
     public ResponseEntity postDelete(
             @PathVariable int id,
             @AuthenticationPrincipal CustomUserDetails customUserDetails) {
@@ -55,6 +60,7 @@ public class PostController {
     }
 
     @PostMapping("/{id}/reactions")
+    @Operation(summary = "좋아요 / 싫어요", description = "다른 유저 게시글에 좋아요 / 싫어요 반응 API")
     public ResponseEntity postReaction(
             @PathVariable int id,
             @RequestBody PostReactionDTO postReactionDTO,
@@ -65,11 +71,13 @@ public class PostController {
     }
 
     @GetMapping("my")
+    @Operation(summary = "작성한 게시글 조회", description = "유저가 직접 작성한 게시글 조회 API")
     public MyPostListDTO getMyPostList(@AuthenticationPrincipal CustomUserDetails customUserDetails) {
         return postService.getMyPostList(customUserDetails.getUserEntity());
     }
 
     @GetMapping("/lists")
+    @Operation(summary = "게시글 목록 조회", description = "게시글 목록 조회 API")
     public ResponseEntity<Page<PostListPageDTO>> getBoardList(
             /// page: 현재 페이지 (0부터 시작), size: 한 페이지 게시글 수, sort: 정렬 기준, direction: 정렬 방식
             @PageableDefault(page = 0, size = 10, sort = "id", direction = Sort.Direction.DESC) Pageable pageable
@@ -80,6 +88,7 @@ public class PostController {
     }
 
     @GetMapping("/{categoryId}/lists")
+    @Operation(summary = "게시글 목록 카테고리별 조회", description = "게시글 목록 카테고리별 조회 API")
     public ResponseEntity<Page<PostListPageDTO>> getCategoryBoardList(
             @PathVariable int categoryId,
             /// page: 현재 페이지 (0부터 시작), size: 한 페이지 게시글 수, sort: 정렬 기준, direction: 정렬 방식
@@ -91,6 +100,7 @@ public class PostController {
     }
 
     @GetMapping("/search")
+    @Operation(summary = "게시글 검색", description = "게시글 검색 API ")
     public ResponseEntity<List<PostSearchResultDTO>> searchPosts(@RequestParam("query") String query) {
         return ResponseEntity.ok(typesenseService.search(query));
     }

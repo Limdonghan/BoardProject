@@ -5,6 +5,7 @@ import com.example.BoardProject_back.dto.CommentRespDTO;
 import com.example.BoardProject_back.entity.UserEntity;
 import com.example.BoardProject_back.security.CustomUserDetails;
 import com.example.BoardProject_back.service.CommentService;
+import io.swagger.v3.oas.annotations.Operation;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.core.Authentication;
@@ -21,6 +22,7 @@ public class CommentController {
     private final CommentService commentService;
 
     @PostMapping("/comment")
+    @Operation(summary = "댓글 작성", description = "댓글 작성 API")
     public ResponseEntity addComment(
             @PathVariable int postId,
             @RequestBody CommentDTO commentDTO,
@@ -32,6 +34,7 @@ public class CommentController {
     }
 
     @GetMapping("/comment")
+    @Operation(summary = "댓글 조회", description = "댓글 조회 API (비로그인 가능)")
     public ResponseEntity<List<CommentRespDTO>> getComments(
             @PathVariable int postId,
             Authentication authentication) {
@@ -54,6 +57,7 @@ public class CommentController {
     }
 
     @PatchMapping("/comment/{commendId}")
+    @Operation(summary = "댓글 수정", description = "댓글 수정 API")
     public ResponseEntity updateComment(
             @PathVariable int commendId,
             @RequestBody CommentDTO commentDTO,
@@ -64,12 +68,12 @@ public class CommentController {
     }
 
     @DeleteMapping("/comment/{commendId}")
+    @Operation(summary = "댓글 삭제", description = "댓글 삭제 API")
     public ResponseEntity deleteComment(
             @PathVariable int commendId,
-            @PathVariable int postId,
             @AuthenticationPrincipal CustomUserDetails customUserDetails
     ){
-        commentService.deleteComment(commendId,postId,customUserDetails.getUserEntity());
+        commentService.deleteComment(commendId,customUserDetails.getUserEntity());
         return ResponseEntity.ok("댓글 삭제 완료");
     }
 }

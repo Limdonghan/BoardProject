@@ -10,6 +10,6 @@ public interface CommentService {
     void CreateComment(int postId, CommentDTO commentDTO, UserEntity userEntity);
     List<CommentRespDTO> getComments(int postId, UserEntity userEntity);
     void updateComment(int commendId,CommentDTO commentDTO, UserEntity userEntity);
-    void deleteComment(int commendId,int postId,UserEntity userEntity);
+    void deleteComment(int commendId,UserEntity userEntity);
 
 }

@@ -149,8 +149,7 @@ public class CommentServiceImpl implements CommentService {
      */
     @Override
     @Transactional
-    public void deleteComment(int commendId,int postId, UserEntity userEntity) {
-        log.info("userid: {}",userEntity.getId());
+    public void deleteComment(int commendId, UserEntity userEntity) {
         CommentEntity comment = commentRepository.findByIdAndIsDeletedFalse(commendId)
                 .orElseThrow(() -> new IllegalArgumentException("이미 삭제된 게시글입니다"));
         comment.commentDelete();
