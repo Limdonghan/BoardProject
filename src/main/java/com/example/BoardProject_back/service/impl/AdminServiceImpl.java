@@ -1,22 +1,16 @@
 package com.example.BoardProject_back.service.impl;
 
-<<<<<<< HEAD
 import com.example.BoardProject_back.dto.*;
 import com.example.BoardProject_back.entity.ImageEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.ReportEntity;
 import com.example.BoardProject_back.repository.ImageRepository;
-=======
-import com.example.BoardProject_back.dto.PostInfoDTO;
 import com.example.BoardProject_back.dto.ReportDetailDTO;
 import com.example.BoardProject_back.dto.ReportListDTO;
 import com.example.BoardProject_back.dto.ReportStatusSummaryDTO;
 import com.example.BoardProject_back.entity.CommentEntity;
-import com.example.BoardProject_back.entity.PostEntity;
-import com.example.BoardProject_back.entity.ReportEntity;
 import com.example.BoardProject_back.repository.CommentRepository;
 import com.example.BoardProject_back.repository.PostRepository;
->>>>>>> feature/admin
 import com.example.BoardProject_back.repository.ReportRepository;
 import com.example.BoardProject_back.service.AdminService;
 import com.example.BoardProject_back.service.TypesenseService;
@@ -32,13 +26,10 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
-<<<<<<< HEAD
     private final ImageRepository imageRepository;
-=======
     private final PostRepository postRepository;
     private final CommentRepository commentRepository;
     private final TypesenseService typesenseService;
->>>>>>> feature/admin
 
     /**
      * 신고 페이지네이션 - 전체
@@ -172,7 +163,7 @@ public class AdminServiceImpl implements AdminService {
 
         ReportEntity reportEntity = reportRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Report not found"));
 
-        if (reportEntity.getPost()!=null) {
+        if (reportEntity.getPost() != null) {
             List<ReportEntity> byPostId = reportRepository.findAllByPostId(reportEntity.getPost().getId());
 
             /// 게시글 조회
