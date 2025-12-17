@@ -60,16 +60,16 @@ public class CommentServiceImpl implements CommentService {
         } else {
             /// 원댓글인 경우
              commentEntity.setDepth(0);
-            // group_id는 자기 자신의 id여야 함. 하지만 아직 저장 전이라 id가 없음(0).
-            // 따라서 일단 저장을 먼저 하고 update를 쳐야 함 (Auto Increment 전략의 한계)
+            /// group_id는 자기 자신의 id여야 함. 하지만 아직 저장 전이라 id가 없음(0).
+            /// 따라서 일단 저장을 먼저 하고 update를 쳐야 함 (Auto Increment 전략의 한계)
         }
 
         CommentEntity savedComment = commentRepository.save(commentEntity);
 
-        // [원댓글 후처리] 저장 후 생성된 ID를 GroupID로 업데이트
+        /// [원댓글 후처리] 저장 후 생성된 ID를 GroupID로 업데이트
         if (commentDTO.getParentId() == null) {
             savedComment.setGroupId(savedComment.getId());
-            // @Transactional 때문에 메서드 종료 시 변경 감지(Dirty Checking)로 자동 update 쿼리 나감
+            /// @Transactional 때문에 메서드 종료 시 변경 감지(Dirty Checking)로 자동 update 쿼리 나감
         }
         UserEntity user = userRepository.findById(userEntity.getId())
                 .orElseThrow(() -> new IllegalArgumentException("댓글을 작성한 유저를 찾을 수 없음??"));
@@ -99,7 +99,7 @@ public class CommentServiceImpl implements CommentService {
             }
             return CommentRespDTO.builder()
                     .commentId(comment.getId())
-                    .content(comment.isDeleted() ? "삭제된 게시글 입니다." : comment.getComment())
+                    .content(comment.isDeleted() ? "삭제된 댓글 입니다." : comment.getComment())
                     .authorName(comment.getUser().getNickName())
                     .createdAt(comment.getCreatedAt())
                     .isOwner(isOwner)
