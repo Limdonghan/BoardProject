@@ -4,14 +4,19 @@ import com.example.BoardProject_back.dto.PostInfoDTO;
 import com.example.BoardProject_back.dto.ReportDetailDTO;
 import com.example.BoardProject_back.dto.ReportListDTO;
 import com.example.BoardProject_back.dto.ReportStatusSummaryDTO;
+import com.example.BoardProject_back.entity.CommentEntity;
 import com.example.BoardProject_back.entity.PostEntity;
 import com.example.BoardProject_back.entity.ReportEntity;
+import com.example.BoardProject_back.repository.CommentRepository;
+import com.example.BoardProject_back.repository.PostRepository;
 import com.example.BoardProject_back.repository.ReportRepository;
 import com.example.BoardProject_back.service.AdminService;
+import com.example.BoardProject_back.service.TypesenseService;
 import lombok.RequiredArgsConstructor;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.Pageable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
 
@@ -19,6 +24,9 @@ import java.util.List;
 @RequiredArgsConstructor
 public class AdminServiceImpl implements AdminService {
     private final ReportRepository reportRepository;
+    private final PostRepository postRepository;
+    private final CommentRepository commentRepository;
+    private final TypesenseService typesenseService;
 
     /**
      * 신고 페이지네이션 - 전체
@@ -26,7 +34,7 @@ public class AdminServiceImpl implements AdminService {
     @Override
     public Page<ReportListDTO> getReportList(Pageable pageable) {
         Page<ReportEntity> reportPage = reportRepository.findAllByOrderByCreatedAtDesc(pageable);
-        return reportPage.map(report->new ReportListDTO(report));
+        return reportPage.map(report -> new ReportListDTO(report));
     }
 
     /**
@@ -133,4 +141,41 @@ public class AdminServiceImpl implements AdminService {
                         .build())
                 .build();
     }
+
+    /**
+     * 게시글 삭제 및 댓글 삭제
+     */
+    @Override
+    @Transactional
+    public void adminConsole(int id) {
+
+        ReportEntity reportEntity = reportRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Report not found"));
+
+        if (reportEntity.getPost()!=null) {
+            List<ReportEntity> byPostId = reportRepository.findAllByPostId(reportEntity.getPost().getId());
+
+            /// 게시글 조회
+            PostEntity post = postRepository.findById(byPostId.get(0).getId())
+                    .orElseThrow(() -> new IllegalArgumentException("이미 삭제된 게시글!"));
+
+            /// 게시글 삭제
+            post.postDelete();
+
+            /// typesense 삭제
+            typesenseService.deletePost(id);
+        } else {
+            List<ReportEntity> allByCommentId = reportRepository.findAllByCommentId(reportEntity.getComment().getId());
+
+            /// 댓글 조회
+            CommentEntity comment = commentRepository.findById(allByCommentId.get(0).getId())
+                    .orElseThrow(() -> new IllegalArgumentException("이미 삭제된 댓글"));
+
+            /// 댓글 삭제
+            comment.commentDelete();
+        }
+
+
+    }
+
+
 }
