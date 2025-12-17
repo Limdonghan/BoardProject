@@ -161,25 +161,24 @@ public class AdminServiceImpl implements AdminService {
     @Transactional
     public void adminConsole(int id) {
 
-        ReportEntity reportEntity = reportRepository.findById(id).orElseThrow(() -> new IllegalArgumentException("Report not found"));
+        ReportEntity reportEntity = reportRepository.findById(id)
+                .orElseThrow(() -> new IllegalArgumentException("Report not found"));
 
         if (reportEntity.getPost() != null) {
-            List<ReportEntity> byPostId = reportRepository.findAllByPostId(reportEntity.getPost().getId());
 
             /// 게시글 조회
-            PostEntity post = postRepository.findById(byPostId.get(0).getId())
+            PostEntity post = postRepository.findById(reportEntity.getPost().getId())
                     .orElseThrow(() -> new IllegalArgumentException("이미 삭제된 게시글!"));
 
             /// 게시글 삭제
             post.postDelete();
 
             /// typesense 삭제
-            typesenseService.deletePost(id);
+            typesenseService.deletePost(reportEntity.getPost().getId());
         } else {
-            List<ReportEntity> allByCommentId = reportRepository.findAllByCommentId(reportEntity.getComment().getId());
 
             /// 댓글 조회
-            CommentEntity comment = commentRepository.findById(allByCommentId.get(0).getId())
+            CommentEntity comment = commentRepository.findById(reportEntity.getComment().getId())
                     .orElseThrow(() -> new IllegalArgumentException("이미 삭제된 댓글"));
 
             /// 댓글 삭제
