@@ -266,7 +266,7 @@ public class PostServiceImpl implements PostService {
         PostReactionEntity build = PostReactionEntity.builder()
                 .post(postEntity)
                 .user(userEntity)
-                .reactionType(postReactionDTO.getRectionType())
+                .reactionType(postReactionDTO.getReactionType())
                 .build();
         postReactionRepository.save(build);
 
@@ -274,7 +274,7 @@ public class PostServiceImpl implements PostService {
         /// 포인트 자추 금지
         boolean isSelfReaction = author.getEmail().equals(userEntity.getEmail());
 
-        if (postReactionDTO.getRectionType().equals("LIKE")) {
+        if (postReactionDTO.getReactionType().equals("LIKE")) {
             postEntity.likeHandle(postEntity.getLikeCount());       /// 좋아요 증가
 
             /// 본인이 작성한 게시글이 아는글에 좋아요를 누르면 포인트 지급
@@ -282,7 +282,7 @@ public class PostServiceImpl implements PostService {
                 author.userAddPoint(PointRole.LIKE);
             }
 
-        } else if (postReactionDTO.getRectionType().equals("DISLIKE")) {
+        } else if (postReactionDTO.getReactionType().equals("DISLIKE")) {
             postEntity.disLikeHandle(postEntity.getDisLikeCount());  /// 싫어요 증가
 
             /// 본인이 작성한 게시글이 아는글에 싫어요를 누르면 포인트 감소
