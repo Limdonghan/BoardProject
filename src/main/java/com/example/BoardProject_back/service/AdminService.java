@@ -13,4 +13,6 @@ public interface AdminService {
     Page<ReportListDTO> getCommentAndStatusList(Pageable pageable, int statusId);
 
     ReportDetailDTO getReportDetail(int reportId);
+
+    void adminConsole (int id);
 }

@@ -13,10 +13,7 @@ import org.springframework.data.domain.Sort;
 import org.springframework.data.web.PageableDefault;
 import org.springframework.http.ResponseEntity;
 import org.springframework.security.access.prepost.PreAuthorize;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.PathVariable;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 
@@ -83,5 +80,12 @@ public class AdminController {
             @PathVariable int statusId) {
         Page<ReportListDTO> reportList = adminService.getCommentAndStatusList(pageable, statusId);
         return ResponseEntity.ok(reportList);
+    }
+    
+    @PreAuthorize("hasRole('ADMIN')")
+    @DeleteMapping("/{id}")
+    public ResponseEntity adminDelete(@PathVariable int id) {
+        adminService.adminConsole(id);
+        return ResponseEntity.ok("관리자 삭제 완료");
     }
 }
