@@ -106,7 +106,3 @@ http://localhost:8080/swagger-ui/index.html
 ## 📝 License
 
 This project is licensed under the MIT License.
-<<<<<<< HEAD
-=======
->>>>>>> develop
->>>>>>> origin/main
