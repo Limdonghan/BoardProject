@@ -18,7 +18,15 @@ bin/
 !**/src/test/**/bin/
 
 ### Config files ###
+# 레포에는 (시크릿이 없는) application.properties / application-prod.properties 를 포함(커밋)합니다.
+# 실제 시크릿은 로컬 전용 파일 또는 서버 환경변수로만 관리
 src/main/resources/application.properties
+src/main/resources/application-prod.local.properties
+
+# 예시 템플릿은 커밋 허용
+!src/main/resources/application-local.properties.example
+src/main/resources/application-local.properties
+src/main/resources/docker-compose.yml
 
 ### IntelliJ IDEA ###
 .idea
@@ -41,3 +49,6 @@ out/
 
 ### TestFile ###
 src/test
+
+### Typesence Data ###
+src/main/resources/typesense-data
