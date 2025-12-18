@@ -1,0 +1,18 @@
+package com.example.BoardProject_back.dto;
+
+import lombok.Builder;
+import lombok.Getter;
+import lombok.Setter;
+
+@Getter
+@Setter
+@Builder
+public class UserUpdatePasswordDTO {
+
+    private String oldPassword;
+    private String newPassword;
+    public UserUpdatePasswordDTO(String oldPassword, String newPassword) {
+        this.oldPassword = oldPassword;
+        this.newPassword = newPassword;
+    }
+}

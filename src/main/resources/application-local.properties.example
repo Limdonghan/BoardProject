@@ -1,0 +1,55 @@
+#
+# 로컬 개발용 시크릿/환경설정 템플릿
+# - 이 파일은 예시(example)라서 커밋 대상입니다.
+# - 실제 값은 application-local.properties로 복사해서 채우고, 그 파일은 절대 커밋하지 마세요.
+#
+# 사용 방법:
+# 1) application-local.properties.example -> application-local.properties 로 복사
+# 2) 아래 값들을 본인 로컬 환경에 맞게 채우기
+# 3) 실행 시 프로필/설정 로딩 방식에 맞게 적용(예: --spring.profiles.active=local 또는 IDE 설정)
+#
+
+# =========================
+# DB (MySQL)
+# =========================
+# local
+DB_URL=jdbc:[CHANGE ME]
+DB_USERNAME=[CHANGE ME]
+DB_PASSWORD=[CHANGE ME]
+
+# prod
+DB_PROD_URL=
+DB_PROD_USERNAME=
+DB_PROD_PASSWORD=
+
+# =========================
+# Redis
+# =========================
+REDIS_HOST=localhost
+REDIS_PORT=6379
+
+# =========================
+# JWT
+# =========================
+# 최소 32바이트 이상 랜덤 권장
+JWT_SECRET_KEY=[CHANGE ME]
+JWT_ACCESS_EXPIRATION=900000
+JWT_REFRESH_EXPIRATION=1209600000
+
+# =========================
+# AWS S3
+# =========================
+AWS_ACCESS_KEY_ID=[CHANGE ME]
+AWS_SECRET_ACCESS_KEY=[CHANGE ME]
+AWS_S3_BUCKET=[CHANGE ME]
+AWS_REGION=ap-northeast-2
+AWS_STACK_AUTO=false
+
+# =========================
+# Typesense
+# =========================
+TYPESENSE_PROTOCOL=http
+TYPESENSE_HOST=localhost
+TYPESENSE_PORT=8108
+TYPESENSE_API_KEY=[CHANGE ME]
+
