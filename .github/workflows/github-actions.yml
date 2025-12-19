@@ -35,13 +35,7 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-
-    - name: Debug - list folders
-      run: |
-       pwd
-       ls -al
-       git submodule status || true
-       find . -maxdepth 3 -type d -print
+      
     - name: Build with Gradle Wrapper
       run: |
         set -e
