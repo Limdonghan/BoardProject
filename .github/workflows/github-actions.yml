@@ -42,7 +42,6 @@ jobs:
        ls -al
        git submodule status || true
        find . -maxdepth 3 -type d -print
-        
     - name: Build with Gradle Wrapper
       run: |
         set -e
