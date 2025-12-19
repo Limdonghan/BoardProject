@@ -41,7 +41,7 @@ jobs:
        pwd
        ls -al
        git submodule status || true
-       find . -maxdepth 3 -type d -print
+       find . -max depth 3 -type d -print
 
     - name: Detect backend dir
       run: |
