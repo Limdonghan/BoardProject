@@ -41,21 +41,21 @@ jobs:
        pwd
        ls -al
        git submodule status || true
-       find . -max depth 3 -type d -print
+       find . -maxdepth 3 -type d -print
 
     - name: Detect backend dir
       run: |
        set -e
        if [ -d "BoardProject-back" ]; then
-         echo "BACK_DIR=BoardProject-back" >> $GITHUB_ENV
-        elif [ -d "BoardProject_back" ]; then
-          echo "BACK_DIR=BoardProject_back" >> $GITHUB_ENV
-        else
+       echo "BACK_DIR=BoardProject-back" >> $GITHUB_ENV
+       elif [ -d "BoardProject_back" ]; then
+       echo "BACK_DIR=BoardProject_back" >> $GITHUB_ENV
+       else
      # build.gradle / settings.gradle 있는 폴더를 하나 찾아서 사용
-         D=$(find . -maxdepth 3 -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) -printf '%h\n' | head -n 1)
-         echo "BACK_DIR=${D#./}" >> $GITHUB_ENV
-        fi
-        echo "BACK_DIR=$BACK_DIR"
+       D=$(find . -maxdepth 3 -type f \( -name "settings.gradle" -o -name "settings.gradle.kts" -o -name "build.gradle" -o -name "build.gradle.kts" \) -printf '%h\n' | head -n 1)
+       echo "BACK_DIR=${D#./}" >> $GITHUB_ENV
+       fi
+       echo "BACK_DIR=$BACK_DIR"
 
     - name: Build with Gradle Wrapper
       run: |
