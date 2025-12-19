@@ -35,17 +35,10 @@ jobs:
     # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
     - name: Setup Gradle
       uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
-      
     - name: Build with Gradle Wrapper
       run: |
-        set -e
-         if [ -f "./gradlew" ]; then
-         chmod +x ./gradlew
-        ./gradlew -p "$BACK_DIR" clean build
-       else
-        chmod +x "$BACK_DIR/gradlew"
-       (cd "$BACK_DIR" && ./gradlew clean build)
-        fi
+        chmod +x ./gradlew
+        ./gradlew -p BoardProject-back clean build
 
     # 1. AWS 자격 증명 설정 (GitHub Secrets에 키 등록 필요)
     - name: Configure AWS credentials (OIDC)
@@ -68,7 +61,7 @@ jobs:
         REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
         TAG="${GITHUB_SHA::7}"
 
-        docker build -t "${REGISTRY}/${ECR_REPO}:${TAG}" -t "${REGISTRY}/${ECR_REPO}:latest" "$BACK_DIR"
+        docker build -t "${REGISTRY}/${ECR_REPO}:${TAG}" -t "${REGISTRY}/${ECR_REPO}:latest" ./BoardProject-back
         docker push "${REGISTRY}/${ECR_REPO}:${TAG}"
         docker push "${REGISTRY}/${ECR_REPO}:latest"
 
