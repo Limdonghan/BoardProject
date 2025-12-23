@@ -9,7 +9,7 @@ name: Java CI with Gradle
 
 on:
   push:
-    branches: [develop,main]
+    branches: [develop, main]
 
 permissions:
   id-token: write
@@ -17,81 +17,78 @@ permissions:
 
 jobs:
   build:
-
     runs-on: ubuntu-latest
     permissions:
       id-token: write
       contents: read
 
     steps:
-    - uses: actions/checkout@v4
-    - name: Set up JDK 17
-      uses: actions/setup-java@v4
-      with:
-        java-version: '17'
-        distribution: 'temurin'
+      - uses: actions/checkout@v4
+      - name: Set up JDK 17
+        uses: actions/setup-java@v4
+        with:
+          java-version: "17"
+          distribution: "temurin"
 
-    # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
-    # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
-    - name: Setup Gradle
-      uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
+      # Configure Gradle for optimal use in GitHub Actions, including caching of downloaded dependencies.
+      # See: https://github.com/gradle/actions/blob/main/setup-gradle/README.md
+      - name: Setup Gradle
+        uses: gradle/actions/setup-gradle@af1da67850ed9a4cedd57bfd976089dd991e2582 # v4.0.0
 
-#    - name: Build with Gradle Wrapper
-#      run: |
-#        chmod +x ./gradlew
-#        ./gradlew clean build
+      #    - name: Build with Gradle Wrapper
+      #      run: |
+      #        chmod +x ./gradlew
+      #        ./gradlew clean build
 
-    # 1. AWS 자격 증명 설정 (GitHub Secrets에 키 등록 필요)
-    - name: Configure AWS credentials (OIDC)
-      uses: aws-actions/configure-aws-credentials@v4
-      with:
-        role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
-        aws-region: ${{ secrets.AWS_REGION }}
+      # 1. AWS 자격 증명 설정 (GitHub Secrets에 키 등록 필요)
+      - name: Configure AWS credentials (OIDC)
+        uses: aws-actions/configure-aws-credentials@v4
+        with:
+          role-to-assume: ${{ secrets.AWS_ROLE_ARN }}
+          aws-region: ${{ secrets.AWS_REGION }}
 
-    # 2. ECR 로그인
-    - name: Login to Amazon ECR
-      uses: aws-actions/amazon-ecr-login@v2
+      # 2. ECR 로그인
+      - name: Login to Amazon ECR
+        uses: aws-actions/amazon-ecr-login@v2
 
-    # 3. Docker 이미지 빌드 및 ECR Push
-    - name: Build & Push backend image (BoardProject-back)
-      env:
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        ECR_REPO: ${{ secrets.ECR_REPO }}
-      run: |
-        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        TAG="${GITHUB_SHA::7}"
+      # 3. Docker 이미지 빌드 및 ECR Push
+      - name: Build & Push backend image (BoardProject-back)
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          TAG="${GITHUB_SHA::7}"
 
-        docker build -t "${REGISTRY}/${ECR_REPO}:${TAG}" -t "${REGISTRY}/${ECR_REPO}:latest" .
-        docker push "${REGISTRY}/${ECR_REPO}:${TAG}"
-        docker push "${REGISTRY}/${ECR_REPO}:latest"
+          docker build -t "${REGISTRY}/${ECR_REPO}:${TAG}" -t "${REGISTRY}/${ECR_REPO}:latest" .
+          docker push "${REGISTRY}/${ECR_REPO}:${TAG}"
+          docker push "${REGISTRY}/${ECR_REPO}:latest"
 
-    # 4. AWS SSM을 통해 EC2에 배포 명령 전달 (SSH 불필요)
-    - name: Deploy on EC2 via SSM RunCommand
-      if: github.ref == 'refs/heads/main'
-      env:
-        AWS_REGION: ${{ secrets.AWS_REGION }}
-        INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
-        ECR_REPO: ${{ secrets.ECR_REPO }}
-      run: |
-        ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
-        REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
-        aws ssm send-command \
-            --instance-ids "$INSTANCE_ID" \
-            --document-name "AWS-RunShellScript" \
-            --comment "Deploy latest backend container" \
-            --parameters commands='[
-              \"cd /opt/app\",
-        
-              \"echo 'ECR 로그인...'\",
-              \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${REGISTRY}\",
-        
-              \"echo 'Pull & Deploy...'\",
-              \"docker compose pull\",
-              \"docker compose up -d\",
-        
-              \"echo '이미지 정리...'\",
-              \"docker image prune -f\"
-            ]"
+      # 4. AWS SSM을 통해 EC2에 배포 명령 전달 (SSH 불필요)
+      - name: Deploy on EC2 via SSM RunCommand
+        # if: github.ref == 'refs/heads/main'
+        env:
+          AWS_REGION: ${{ secrets.AWS_REGION }}
+          INSTANCE_ID: ${{ secrets.EC2_INSTANCE_ID }}
+          ECR_REPO: ${{ secrets.ECR_REPO }}
+        run: |
+          ACCOUNT_ID=$(aws sts get-caller-identity --query Account --output text)
+          REGISTRY="${ACCOUNT_ID}.dkr.ecr.${AWS_REGION}.amazonaws.com"
+          aws ssm send-command \
+              --instance-ids "$INSTANCE_ID" \
+              --document-name "AWS-RunShellScript" \
+              --comment "Deploy latest backend container" \
+              --parameters commands='[
+                \"cd /opt/app\",
 
+                \"echo 'ECR 로그인...'\",
+                \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${REGISTRY}\",
 
+                \"echo 'Pull & Deploy...'\",
+                \"docker compose pull\",
+                \"docker compose up -d\",
+
+                \"echo '이미지 정리...'\",
+                \"docker image prune -f\"
+              ]"
