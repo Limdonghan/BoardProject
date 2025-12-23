@@ -82,13 +82,10 @@ jobs:
               --parameters commands='[
                 \"cd /opt/app\",
 
-                \"echo 'ECR 로그인...'\",
                 \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${REGISTRY}\",
 
-                \"echo 'Pull & Deploy...'\",
                 \"docker compose pull\",
                 \"docker compose up -d\",
 
-                \"echo '이미지 정리...'\",
                 \"docker image prune -f\"
               ]"
