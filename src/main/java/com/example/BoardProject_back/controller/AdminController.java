@@ -31,6 +31,7 @@ public class AdminController {
     private final AdminService adminService;
     private final ReportService reportService;
 
+    @PreAuthorize("hasRole('ADMIN')")
     @GetMapping("/sync-typesense")
     @Operation(summary = "기존 게시글 인덱싱", description = "로컬에서 진행한 DB내용 Typesense에 인덱싱")
     public String syncAllData() {

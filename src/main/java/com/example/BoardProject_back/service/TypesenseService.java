@@ -203,7 +203,7 @@ public class TypesenseService {
         fields.add(new Field().name("totalComments").type(FieldTypes.INT32).optional(true));    /// 검색 조회 '총 댓글 수'
         fields.add(new Field().name("totalLikes").type(FieldTypes.INT32).optional(true));       /// 검색 조회 '총 좋아요 수'
         fields.add(new Field().name("created_at").type(FieldTypes.INT64));                      /// 정렬 '생성일자'
-        fields.add(new Field().name("imageURL").type(FieldTypes.STRING_ARRAY).optional(true));  /// [추가] ImageURL 저장 List<String>
+        fields.add(new Field().name("imageUrls").type(FieldTypes.STRING_ARRAY).optional(true));  /// [추가] ImageURL 저장 List<String>
 
         collectionSchema.fields(fields);
         collectionSchema.defaultSortingField("created_at");
