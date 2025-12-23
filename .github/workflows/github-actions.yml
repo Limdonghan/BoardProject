@@ -79,7 +79,7 @@ jobs:
               --instance-ids "$INSTANCE_ID" \
               --document-name "AWS-RunShellScript" \
               --comment "Deploy latest backend container" \
-              --parameters commands='[
+              --parameters commands="[
                 \"cd /opt/app\",
                 
                 \"aws ecr get-login-password --region ${{ env.AWS_REGION }} | docker login --username AWS --password-stdin ${REGISTRY}\",
@@ -88,4 +88,4 @@ jobs:
                 \"docker compose up -d\",
 
                 \"docker image prune -f\"
-              ]'
+              ]"
