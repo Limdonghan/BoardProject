@@ -96,6 +96,10 @@ public class TypesenseService {
             /// 추출한 문자열 리스트를 문서에 넣기
             document.put("imageUrls", imageUrls);
 
+
+            /// [추가] is_deleted 여부
+            document.put("is_deleted",post.isDeleted());
+
             /// 게시글을 작성하거나 수정했을 때, 해당 내용을 Typesense에 동기화 upsert(save + update)
             client.collections(COLLECTION_NAME).documents().upsert(document);
         } catch (Exception e) {
@@ -135,35 +139,40 @@ public class TypesenseService {
             if (searchResult.getHits() == null) {
                 return results;
             }
+
+
             /// 검색 엔진이 찾아낸 결과물 List를 for문 돌리며 DTO 변환(매핑)
             for (SearchResultHit hit : searchResult.getHits()) {
                 Map<String, Object> document = hit.getDocument();
 
-                int postId = Integer.parseInt(document.get("post_id").toString());
-                String title = document.getOrDefault("title", "").toString();
-                String content = document.getOrDefault("content", "").toString();
-                String author = document.getOrDefault("author", "").toString();
-                String category = document.getOrDefault("category", "").toString();
+                if (document.get("is_deleted").equals(Boolean.FALSE)) {
 
-                /// 숫자형 필드 안전하게 가져오기
-                int viewCount = document.get("viewCount") != null ? ((Number) document.get("viewCount")).intValue():0;
-                int totalComments = document.get("totalComments") != null ? ((Number) document.get("totalComments")).intValue() : 0;
-                int totalLikes = document.get("totalLikes") != null ? ((Number) document.get("totalLikes")).intValue() : 0;
+                    int postId = Integer.parseInt(document.get("post_id").toString());
+                    String title = document.getOrDefault("title", "").toString();
+                    String content = document.getOrDefault("content", "").toString();
+                    String author = document.getOrDefault("author", "").toString();
+                    String category = document.getOrDefault("category", "").toString();
 
-                /// 날짜 변환 (Epoch Second -> LocalDateTime)
-                long createdAtEpoch = document.get("created_at") != null ? ((Number) document.get("created_at")).longValue() : 0L;
-                LocalDateTime createdAt = LocalDateTime.ofEpochSecond(createdAtEpoch, 0, ZoneOffset.UTC);
+                    /// 숫자형 필드 안전하게 가져오기
+                    int viewCount = document.get("viewCount") != null ? ((Number) document.get("viewCount")).intValue() : 0;
+                    int totalComments = document.get("totalComments") != null ? ((Number) document.get("totalComments")).intValue() : 0;
+                    int totalLikes = document.get("totalLikes") != null ? ((Number) document.get("totalLikes")).intValue() : 0;
 
-                /// Image 가져오기
-                List<String> imageUrl = new ArrayList<>();
-                if (document.get("imageUrls") != null) {
-                    /// Typesense 응답은 List 형태이므로 캐스팅
-                    imageUrl = (List<String>) document.get("imageUrls");
+                    /// 날짜 변환 (Epoch Second -> LocalDateTime)
+                    long createdAtEpoch = document.get("created_at") != null ? ((Number) document.get("created_at")).longValue() : 0L;
+                    LocalDateTime createdAt = LocalDateTime.ofEpochSecond(createdAtEpoch, 0, ZoneOffset.UTC);
+
+                    /// Image 가져오기
+                    List<String> imageUrl = new ArrayList<>();
+                    if (document.get("imageUrls") != null) {
+                        /// Typesense 응답은 List 형태이므로 캐스팅
+                        imageUrl = (List<String>) document.get("imageUrls");
+                    }
+
+                    results.add(new PostSearchResultDTO(
+                            postId, title, content, author, category, viewCount, totalComments, totalLikes, createdAt, imageUrl
+                    ));
                 }
-
-                results.add(new PostSearchResultDTO(
-                        postId, title, content, author, category, viewCount, totalComments, totalLikes, createdAt, imageUrl
-                ));
             }
         } catch (Exception e) {
             log.warn("Failed to search posts in Typesense", e);
@@ -203,7 +212,8 @@ public class TypesenseService {
         fields.add(new Field().name("totalComments").type(FieldTypes.INT32).optional(true));    /// 검색 조회 '총 댓글 수'
         fields.add(new Field().name("totalLikes").type(FieldTypes.INT32).optional(true));       /// 검색 조회 '총 좋아요 수'
         fields.add(new Field().name("created_at").type(FieldTypes.INT64));                      /// 정렬 '생성일자'
-        fields.add(new Field().name("imageURL").type(FieldTypes.STRING_ARRAY).optional(true));  /// [추가] ImageURL 저장 List<String>
+        fields.add(new Field().name("imageUrls").type(FieldTypes.STRING_ARRAY).optional(true)); /// [추가] ImageURL 저장 List<String>
+        fields.add(new Field().name("is_deleted").type(FieldTypes.BOOL).optional(true));        /// [추가] 삭제여부
 
         collectionSchema.fields(fields);
         collectionSchema.defaultSortingField("created_at");
