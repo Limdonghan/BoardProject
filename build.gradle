@@ -35,6 +35,9 @@ dependencies {
     // typesense Java Client
     implementation 'org.typesense:typesense-java:2.0.0'
 
+    // Actuator Health
+    implementation 'org.springframework.boot:spring-boot-starter-actuator'
+
     developmentOnly 'org.springframework.boot:spring-boot-devtools'
 	runtimeOnly 'com.mysql:mysql-connector-j'
 

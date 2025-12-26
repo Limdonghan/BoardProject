@@ -33,6 +33,7 @@ public class SecurityConfig {
         http.
                 authorizeHttpRequests(authorizeRequest ->
                                 authorizeRequest
+                                        .requestMatchers("/actuator/health").permitAll()
                                         .requestMatchers("/swagger-ui/**", "/swagger-ui.html","/v3/api-docs/**", "/swagger-resources/**","/webjars/**").permitAll()
                                         .requestMatchers(HttpMethod.POST,"/api/user/createAccount","/api/user/refresh").permitAll()
                                         .requestMatchers(HttpMethod.GET,"/api/user/check-nickname").permitAll()
