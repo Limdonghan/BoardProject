@@ -30,6 +30,95 @@ Spring Boot를 기반으로 구축된 게시판 서비스의 백엔드 프로젝
 - **Search**: Typesense를 이용한 게시글 검색
 - **Report**: 게시글/댓글 신고, 신고 사유 및 처리 상태 관리
 - **Admin**: 관리자 기능
+- **File**: AWS S3를 이용한 파일 업로드/삭제
+
+## 🔗 Frontend Integration
+
+이 백엔드는 React + Vite 기반 프론트엔드와 연동됩니다.
+
+### 프론트엔드 기술 스택
+
+- **React**: 19.2.0
+- **Vite**: 7.2.4
+- **React Router DOM**: 7.10.1
+- **Axios**: 1.13.2
+
+### API 연동 방식
+
+#### 개발 환경
+
+- 프론트엔드는 Vite 개발 서버(`http://localhost:5173`)에서 실행됩니다
+- Vite 프록시를 통해 `/api` 경로의 요청이 백엔드(`http://localhost:8080`)로 전달됩니다
+- CORS 문제를 피하기 위해 프록시를 사용합니다
+
+#### 운영 환경
+
+- 프론트엔드는 `VITE_API_URL` 환경변수로 백엔드 서버 주소를 직접 지정합니다
+- 브라우저에서 백엔드 API로 직접 요청을 보냅니다
+- 백엔드에서 CORS 설정이 필요합니다
+
+### 인증 방식
+
+- **Access Token**: `localStorage.accessToken`에 저장
+- **Refresh Token**: `localStorage.refreshToken`에 저장
+- 모든 API 요청 헤더에 `Authorization: Bearer <accessToken>` 자동 포함
+- 401 에러 발생 시 `/api/user/refresh` 엔드포인트로 토큰 자동 갱신 후 원래 요청 재시도
+- 403 에러는 권한 문제로 처리되어 토큰 갱신을 시도하지 않습니다
+
+### 주요 API 엔드포인트
+
+프론트엔드에서 사용하는 주요 API 엔드포인트:
+
+**인증 (Authentication)**
+
+- `POST /api/auth/login` - 로그인
+- `POST /api/auth/logOut` - 로그아웃
+- `POST /api/user/createAccount` - 회원가입
+- `GET /api/user/me` - 현재 사용자 정보 조회
+- `POST /api/user/refresh` - 토큰 재발급
+- `PATCH /api/user/profile` - 프로필 수정 (닉네임)
+- `PATCH /api/user/password` - 비밀번호 변경
+- `GET /api/user/check-nickname` - 닉네임 중복 확인
+
+**게시글 (Post)**
+
+- `GET /api/post/lists` - 게시글 목록 조회 (페이징)
+- `GET /api/post/{categoryId}/lists` - 카테고리별 게시글 목록
+- `GET /api/post/{id}` - 게시글 상세 조회
+- `POST /api/post` - 게시글 작성
+- `PATCH /api/post/{id}` - 게시글 수정
+- `DELETE /api/post/{id}` - 게시글 삭제
+- `POST /api/post/{id}/reactions` - 게시글 반응 (좋아요/싫어요)
+- `GET /api/post/my` - 내 게시글 목록
+- `GET /api/post/search` - 게시글 검색
+
+**댓글 (Comment)**
+
+- `GET /api/post/{postId}/comment` - 댓글 목록 조회
+- `POST /api/post/{postId}/comment` - 댓글 작성
+- `PATCH /api/post/{postId}/comment/{commentId}` - 댓글 수정
+- `DELETE /api/post/{postId}/comment/{commentId}` - 댓글 삭제
+
+**신고 (Report)**
+
+- `POST /api/report/posts/{postId}` - 게시글 신고
+- `POST /api/report/comments/{commentId}` - 댓글 신고
+- `POST /api/report/{reportId}` - 신고 상태 변경
+
+**관리자 (Admin)**
+
+- `GET /api/admin` - 신고 목록 조회 (페이징)
+- `GET /api/admin/{statusId}` - 상태별 신고 목록
+- `GET /api/admin/post/{statusId}` - 게시글 신고 목록 (상태별)
+- `GET /api/admin/comment/{statusId}` - 댓글 신고 목록 (상태별)
+- `GET /api/admin/detail/{reportId}` - 신고 상세 조회
+- `DELETE /api/admin/{id}` - 관리자 삭제 (게시글/댓글)
+- `GET /api/admin/sync-typesense` - Typesense 데이터 동기화
+
+**파일 (File)**
+
+- `POST /api/file/upload` - 이미지 업로드 (multipart/form-data)
+- `DELETE /api/file/delete` - 이미지 삭제
 
 ## 🚀 Getting Started
 
@@ -100,5 +189,28 @@ docker-compose up -d
 
 ```
 
-📚 API References
-http://localhost:8080/swagger-ui/index.html
+## 📚 API References
+
+애플리케이션 실행 후 다음 URL에서 Swagger UI를 통해 API 문서를 확인할 수 있습니다:
+
+- **Swagger UI**: http://localhost:8080/swagger-ui/index.html
+
+## 🔍 개발 팁
+
+### 프론트엔드와 함께 개발 시
+
+1. 백엔드를 먼저 실행합니다 (`./gradlew.bat bootRun` 또는 `./gradlew bootRun`)
+2. 백엔드가 `http://localhost:8080`에서 정상 실행되는지 확인합니다
+3. 프론트엔드 프로젝트에서 `npm run dev`로 개발 서버를 실행합니다
+4. 프론트엔드의 Vite 프록시 설정이 백엔드 주소와 일치하는지 확인합니다 (기본값: `http://localhost:8080`)
+
+### CORS 설정
+
+개발 환경에서는 프론트엔드가 Vite 프록시를 사용하므로 CORS 설정이 필요 없습니다.  
+운영 환경에서는 프론트엔드 도메인을 허용하도록 CORS 설정이 필요합니다.
+
+### 로그 확인
+
+- 애플리케이션 로그는 콘솔에 출력됩니다
+- API 요청/응답 로그를 통해 프론트엔드 연동 문제를 디버깅할 수 있습니다
+- Swagger UI를 통해 API를 직접 테스트할 수 있습니다
