@@ -16,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.net.URLDecoder;
 import java.nio.charset.StandardCharsets;
+import java.util.ArrayList;
 import java.util.List;
 import java.util.stream.Collectors;
 
@@ -154,26 +155,10 @@ public class PostServiceImpl implements PostService {
          * [추가] 이미지 업데이트 처리 과정
          */
 
-        /// 게시글 수정 후 DB에 저장된 이미지
-        List<String> newImgeslist = postUpdateDTO.getImageUrl();
-
-        /// 이미지 삭제 대상 찾기
-        List<ImageEntity> imagesToDelete = currentImagesList.stream()
-                .filter(imageEntity -> !newImgeslist.contains(imageEntity.getUrl()))
-                .toList();
-
-        /// 삭제 대상이 있다면
-        if (!imagesToDelete.isEmpty()) {
-            List<String> deleteImages = imagesToDelete.stream()
-                    .map(ImageEntity::getUrl)
-                    .toList();
-
-            /// S3 삭제
-            awsService.deleteFile(deleteImages);
-
-            /// DB 삭제
-            imageRepository.deleteAll(imagesToDelete);
-        }
+        /// 게시글 수정 후 DB에 저장된 이미지 (null 체크)
+        List<String> newImgeslist = postUpdateDTO.getImageUrl() != null 
+                ? postUpdateDTO.getImageUrl() 
+                : new ArrayList<>();
 
         /// 새로 추가된 이미지가 있다면 DB에 저장
         for (String url : newImgeslist) {
@@ -195,9 +180,33 @@ public class PostServiceImpl implements PostService {
 
         }
 
-        /// typesense 저장
-        typesenseService.indexPost(post);
 
+        /// 이미지 삭제 대상 찾기 (newImgeslist에 없는 이미지들을 삭제)
+        List<ImageEntity> imagesToDelete = currentImagesList.stream()
+                .filter(imageEntity -> !newImgeslist.contains(imageEntity.getUrl()))
+                .toList();
+
+        /// 삭제 대상이 있다면
+        if (!imagesToDelete.isEmpty()) {
+            List<String> deleteImages = imagesToDelete.stream()
+                    .map(ImageEntity::getUrl)
+                    .toList();
+
+            /// S3 삭제
+            awsService.deleteFile(deleteImages);
+
+            /// DB 삭제
+            imageRepository.deleteAll(imagesToDelete);
+        }
+
+        /// 게시글 업데이트 후 Typesense에 재인덱싱 (이미지 변경사항 반영)
+        /// 이미지 삭제 후 최신 이미지 목록을 다시 조회하여 PostEntity에 설정
+        List<ImageEntity> updatedImagesList = imageRepository.findAllByPostId(id);
+        post.getImages().clear();
+        post.getImages().addAll(updatedImagesList);
+        
+        /// Typesense에 게시글 재인덱싱 (삭제된 이미지가 반영된 최신 상태로 업데이트)
+        typesenseService.indexPost(post);
     }
 
     /**
